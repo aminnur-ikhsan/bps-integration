@@ -1,0 +1,6 @@
+# Catatan desain, lokal saja — tidak ikut ke repository
+/docs
+
+.env
+.env.backup
+.env.*.local
