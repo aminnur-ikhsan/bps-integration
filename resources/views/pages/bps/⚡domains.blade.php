@@ -87,7 +87,7 @@ new #[Title('Domain BPS')] class extends Component {
                             <td class="px-4 py-3">{{ $domain->domain_id }}</td>
                             <td class="px-4 py-3">{{ $domain->domain_name }}</td>
                             <td class="px-4 py-3">{{ $domain->domain_url }}</td>
-                            <td class="px-4 py-3">{{ $domain->last_synced_at?->format('d M Y H:i') }}</td>
+                            <td class="px-4 py-3">{{ $domain->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
                         </tr>
                     @empty
                         <tr>
