@@ -16,6 +16,9 @@ jobs:
     services:
       postgres:
         image: postgres:17
+        # Database sekali pakai yang hidup hanya selama satu job dan tidak
+        # terjangkau dari luar runner, jadi sengaja tanpa password sama sekali —
+        # tidak ada kredensial apa pun yang perlu ditulis ke repository.
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: testing
