@@ -11,14 +11,14 @@ class BpsDomainTest extends TestCase
     public function test_a_domain_can_be_stored(): void
     {
         $domain = BpsDomain::create([
-            'domain_id' => '1100',
-            'domain_name' => 'Aceh',
+            'domain_id' => 'TEST-0002',
+            'domain_name' => 'Uji Aceh',
             'domain_url' => 'https://aceh.bps.go.id',
             'type' => 'all',
             'last_synced_at' => now(),
         ]);
 
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => '1100', 'domain_name' => 'Aceh']);
+        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh']);
         // Dibaca ulang dari database, supaya yang diuji benar-benar cast-nya —
         // bukan objek yang memang sudah bertipe tanggal sejak sebelum disimpan.
         // Aplikasi memakai Date::use(CarbonImmutable), jadi yang dicek antarmukanya.

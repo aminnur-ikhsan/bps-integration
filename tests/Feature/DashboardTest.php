@@ -27,7 +27,7 @@ class DashboardTest extends TestCase
     {
         $this->actingAs(\App\Models\User::factory()->create());
 
-        foreach (['1100', '1200', '1300'] as $code) {
+        foreach (['TEST-0002', 'TEST-0004', 'TEST-0005'] as $code) {
             \App\Models\BpsDomain::create([
                 'domain_id' => $code,
                 'domain_name' => 'Wilayah '.$code,
@@ -64,8 +64,8 @@ class DashboardTest extends TestCase
         \App\Models\BpsDomain::query()->delete();
 
         \App\Models\BpsDomain::create([
-            'domain_id' => '1100',
-            'domain_name' => 'Aceh',
+            'domain_id' => 'TEST-0002',
+            'domain_name' => 'Uji Aceh',
             'domain_url' => null,
             'type' => 'all',
             'last_synced_at' => \Illuminate\Support\Facades\Date::parse('2026-08-17 09:30'),

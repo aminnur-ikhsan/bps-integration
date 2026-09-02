@@ -20,8 +20,8 @@ class DomainSyncTest extends TestCase
                 'data' => [
                     ['page' => 1, 'pages' => 1, 'total' => 2],
                     [
-                        ['domain_id' => '0000', 'domain_name' => 'Pusat', 'domain_url' => 'https://www.bps.go.id'],
-                        ['domain_id' => '1100', 'domain_name' => 'Aceh', 'domain_url' => 'https://aceh.bps.go.id'],
+                        ['domain_id' => 'TEST-0001', 'domain_name' => 'Uji Pusat', 'domain_url' => 'https://www.bps.go.id'],
+                        ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh', 'domain_url' => 'https://aceh.bps.go.id'],
                     ],
                 ],
             ]),
@@ -35,8 +35,8 @@ class DomainSyncTest extends TestCase
         $result = app(DomainSync::class)->sync();
 
         $this->assertSame(2, $result->count);
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => '1100', 'domain_name' => 'Aceh']);
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => '0000', 'domain_name' => 'Pusat']);
+        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh']);
+        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0001', 'domain_name' => 'Uji Pusat']);
     }
 
     public function test_syncing_twice_updates_instead_of_duplicating(): void
@@ -46,7 +46,7 @@ class DomainSyncTest extends TestCase
         app(DomainSync::class)->sync();
         app(DomainSync::class)->sync();
 
-        $this->assertSame(1, BpsDomain::where('domain_id', '1100')->count());
+        $this->assertSame(1, BpsDomain::where('domain_id', 'TEST-0002')->count());
     }
 
     public function test_it_follows_every_page(): void
@@ -57,7 +57,7 @@ class DomainSyncTest extends TestCase
                 'data-availability' => 'available',
                 'data' => [
                     ['page' => 1, 'pages' => 2, 'total' => 2],
-                    [['domain_id' => '0000', 'domain_name' => 'Pusat', 'domain_url' => null]],
+                    [['domain_id' => 'TEST-0001', 'domain_name' => 'Uji Pusat', 'domain_url' => null]],
                 ],
             ])
             ->push([
@@ -65,14 +65,14 @@ class DomainSyncTest extends TestCase
                 'data-availability' => 'available',
                 'data' => [
                     ['page' => 2, 'pages' => 2, 'total' => 2],
-                    [['domain_id' => '1100', 'domain_name' => 'Aceh', 'domain_url' => null]],
+                    [['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh', 'domain_url' => null]],
                 ],
             ]);
 
         $result = app(DomainSync::class)->sync();
 
         $this->assertSame(2, $result->count);
-        $this->assertSame(2, BpsDomain::whereIn('domain_id', ['0000', '1100'])->count());
+        $this->assertSame(2, BpsDomain::whereIn('domain_id', ['TEST-0001', 'TEST-0002'])->count());
     }
 
     public function test_it_writes_a_success_log(): void
@@ -92,7 +92,7 @@ class DomainSyncTest extends TestCase
     public function test_a_failure_is_logged_and_leaves_the_data_untouched(): void
     {
         BpsDomain::create([
-            'domain_id' => '1100',
+            'domain_id' => 'TEST-0002',
             'domain_name' => 'Aceh lama',
             'domain_url' => null,
             'type' => 'all',
@@ -114,7 +114,7 @@ class DomainSyncTest extends TestCase
 
         $this->assertSame('failed', $log->status);
         $this->assertSame('kunci salah', $log->error);
-        $this->assertSame('Aceh lama', BpsDomain::where('domain_id', '1100')->value('domain_name'));
+        $this->assertSame('Aceh lama', BpsDomain::where('domain_id', 'TEST-0002')->value('domain_name'));
     }
 
     public function test_it_stores_nothing_when_bps_reports_no_data(): void

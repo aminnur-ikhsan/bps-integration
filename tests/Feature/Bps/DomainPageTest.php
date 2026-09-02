@@ -20,14 +20,21 @@ class DomainPageTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         BpsDomain::create([
-            'domain_id' => '1100',
-            'domain_name' => 'Aceh',
+            'domain_id' => 'TEST-0002',
+            'domain_name' => 'Uji Aceh',
             'domain_url' => 'https://aceh.bps.go.id',
             'type' => 'all',
             'last_synced_at' => now(),
         ]);
 
-        $this->get(route('bps.domains'))->assertOk()->assertSee('Aceh');
+        $this->get(route('bps.domains'))->assertOk();
+
+        // Ordered by domain_id, page 1 only shows 25 rows. Real BPS ids are all
+        // digit-first, so a letter-first test id always sorts past them onto a
+        // later page — search for it instead of relying on default pagination.
+        Livewire::test('pages::bps.domains')
+            ->set('search', 'Uji Aceh')
+            ->assertSee('Uji Aceh');
     }
 
     public function test_the_fetch_button_stores_the_domains(): void
@@ -40,14 +47,14 @@ class DomainPageTest extends TestCase
                 'data-availability' => 'available',
                 'data' => [
                     ['page' => 1, 'pages' => 1, 'total' => 1],
-                    [['domain_id' => '1100', 'domain_name' => 'Aceh', 'domain_url' => null]],
+                    [['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh', 'domain_url' => null]],
                 ],
             ]),
         ]);
 
         Livewire::test('pages::bps.domains')->call('fetchData');
 
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => '1100']);
+        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0002']);
     }
 
     public function test_a_failed_fetch_shows_a_message_instead_of_crashing(): void
@@ -68,7 +75,7 @@ class DomainPageTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        foreach ([['1100', 'Aceh'], ['3500', 'Jawa Timur']] as [$id, $name]) {
+        foreach ([['TEST-0002', 'Uji Aceh'], ['TEST-0003', 'Uji Jawa Timur']] as [$id, $name]) {
             BpsDomain::create([
                 'domain_id' => $id,
                 'domain_name' => $name,
@@ -78,9 +85,11 @@ class DomainPageTest extends TestCase
             ]);
         }
 
+        // Search filters the query before pagination, so real BPS rows on other
+        // pages can't hide a match — "Uji Aceh" genuinely doesn't contain "Jawa".
         Livewire::test('pages::bps.domains')
             ->set('search', 'Jawa')
-            ->assertSee('Jawa Timur')
-            ->assertDontSee('Aceh');
+            ->assertSee('Uji Jawa Timur')
+            ->assertDontSee('Uji Aceh');
     }
 }
