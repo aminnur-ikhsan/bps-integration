@@ -14,7 +14,7 @@ class AdminUserSeeder extends Seeder
         $password = config('app.admin.password');
 
         if (blank($email) || blank($password)) {
-            $this->command?->warn('ADMIN_EMAIL / ADMIN_PASSWORD belum diisi, seeder dilewati.');
+            $this->command->warn('ADMIN_EMAIL / ADMIN_PASSWORD belum diisi, seeder dilewati.');
 
             return;
         }

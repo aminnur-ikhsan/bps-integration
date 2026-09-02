@@ -14,6 +14,9 @@ class BpsClient
 
     /**
      * Ambil satu halaman dari sebuah endpoint BPS dan kembalikan body JSON-nya.
+     *
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
      */
     public function get(string $path, array $query = []): array
     {

@@ -4,6 +4,7 @@ namespace App\Services\Bps;
 
 use App\Models\BpsDomain;
 use App\Models\BpsFetchLog;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 
 class DomainSync
@@ -33,6 +34,8 @@ class DomainSync
 
     /**
      * BPS membagi hasil per halaman, jadi diambil sampai halaman terakhir.
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function fetchAllPages(string $type): array
     {
@@ -64,7 +67,10 @@ class DomainSync
         return $rows;
     }
 
-    private function store(array $rows, string $type, $syncedAt): void
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     */
+    private function store(array $rows, string $type, CarbonInterface $syncedAt): void
     {
         if ($rows === []) {
             return;
@@ -87,6 +93,9 @@ class DomainSync
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $params
+     */
     private function log(
         array $params,
         string $status,
@@ -103,7 +112,7 @@ class DomainSync
             'http_status' => $error?->httpStatus,
             'records_count' => $count,
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'error' => $error?->cause ?? $error?->getMessage(),
+            'error' => $error->cause ?? $error->getMessage(),
             'created_at' => now(),
         ]);
     }
