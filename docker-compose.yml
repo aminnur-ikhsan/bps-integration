@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: runtime
+    container_name: bps_app
+    working_dir: /var/www/html
+    # Jalan sebagai user host supaya file di folder yang di-mount tidak jadi milik root.
+    user: "${DOCKER_UID:-501}:${DOCKER_GID:-20}"
+    environment:
+      # UID host tidak punya entri di /etc/passwd container, jadi HOME diarahkan
+      # ke folder yang bisa ditulis — kalau tidak, cache composer gagal dibuat.
+      HOME: /tmp
+    volumes:
+      - .:/var/www/html
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: bps_nginx
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # Bukan service yang jalan terus. Dipanggil manual saat aset perlu dibangun:
+  #   rtk docker compose --profile tools run --rm assets
+  assets:
+    image: node:22-alpine
+    working_dir: /var/www/html
+    user: "${DOCKER_UID:-501}:${DOCKER_GID:-20}"
+    environment:
+      HOME: /tmp
+    volumes:
+      - .:/var/www/html
+    profiles: [tools]
+    command: sh -c "npm ci && npm run build"
