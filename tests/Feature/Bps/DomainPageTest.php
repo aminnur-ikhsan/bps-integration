@@ -19,6 +19,10 @@ class DomainPageTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
+        // Tabel dikosongkan supaya baris uji pasti berada di halaman pertama.
+        // Transaksi test di-rollback, jadi data sungguhan tidak terpengaruh.
+        BpsDomain::query()->delete();
+
         BpsDomain::create([
             'domain_id' => 'TEST-0002',
             'domain_name' => 'Uji Aceh',
@@ -27,13 +31,8 @@ class DomainPageTest extends TestCase
             'last_synced_at' => now(),
         ]);
 
-        $this->get(route('bps.domains'))->assertOk();
-
-        // Ordered by domain_id, page 1 only shows 25 rows. Real BPS ids are all
-        // digit-first, so a letter-first test id always sorts past them onto a
-        // later page — search for it instead of relying on default pagination.
-        Livewire::test('pages::bps.domains')
-            ->set('search', 'Uji Aceh')
+        $this->get(route('bps.domains'))
+            ->assertOk()
             ->assertSee('Uji Aceh');
     }
 
