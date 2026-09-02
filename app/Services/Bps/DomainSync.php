@@ -112,7 +112,7 @@ class DomainSync
             'http_status' => $error?->httpStatus,
             'records_count' => $count,
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'error' => $error->cause ?? $error->getMessage(),
+            'error' => $error?->cause ?? $error?->getMessage(),
             'created_at' => now(),
         ]);
     }
