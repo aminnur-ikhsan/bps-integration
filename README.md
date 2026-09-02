@@ -20,8 +20,6 @@ Prasyarat: Docker, dan PostgreSQL yang sudah berjalan di luar project ini.
    | `DB_PORT` | Port yang dipublikasikan PostgreSQL di host |
    | `DB_DATABASE` | Nama database yang kamu buat di langkah 2 |
    | `DB_USERNAME`, `DB_PASSWORD` | Kredensial PostgreSQL-mu |
-   | `APP_URL` | `http://localhost:` diikuti nilai `APP_PORT` |
-   | `APP_TIMEZONE` | `Asia/Jakarta` |
    | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Kredensial login pertama yang akan dibuat seeder |
    | `BPS_API_KEY` | Kunci dari portal webapi.bps.go.id |
    | `DOCKER_UID`, `DOCKER_GID` | Hasil `id -u` dan `id -g` |

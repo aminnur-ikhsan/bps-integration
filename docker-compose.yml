@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   # Bukan service yang jalan terus. Dipanggil manual saat aset perlu dibangun:
-  #   rtk docker compose --profile tools run --rm assets
+  #   docker compose --profile tools run --rm assets
   assets:
     image: node:22-alpine
     working_dir: /var/www/html
