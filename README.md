@@ -16,7 +16,7 @@ Prasyarat: Docker, dan PostgreSQL yang sudah berjalan di luar project ini.
 
    | Variabel | Isi dengan |
    |---|---|
-   | `DB_HOST` | Alamat IP mesin database — **bukan** `localhost`, karena aplikasi berjalan di dalam container |
+   | `DB_HOST` | Alamat mesin database — **bukan** `localhost`, karena aplikasi berjalan di dalam container. Kalau database berjalan di mesin yang sama, pakai `host.docker.internal`: alamat itu tetap benar walau IP mesinmu berubah karena pindah jaringan. Di server, isi IP atau hostname database sungguhan |
    | `DB_PORT` | Port yang dipublikasikan PostgreSQL di host |
    | `DB_DATABASE` | Nama database yang kamu buat di langkah 2 |
    | `DB_USERNAME`, `DB_PASSWORD` | Kredensial PostgreSQL-mu |
