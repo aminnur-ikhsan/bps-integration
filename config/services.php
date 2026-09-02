@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'bps' => [
+        'base_url' => env('BPS_BASE_URL', 'https://webapi.bps.go.id/v1/api'),
+        'key' => env('BPS_API_KEY'),
+    ],
+
 ];
