@@ -72,7 +72,9 @@ class BpsClientTest extends TestCase
     public function test_it_throws_when_the_server_cannot_be_reached(): void
     {
         Http::fake(function () {
-            throw new \Illuminate\Http\Client\ConnectionException('Connection timed out');
+            throw new \Illuminate\Http\Client\ConnectionException(
+                'cURL error 6: Could not resolve host for https://webapi.bps.go.id/v1/api/domain?key=kunci-rahasia'
+            );
         });
 
         try {
@@ -81,8 +83,8 @@ class BpsClientTest extends TestCase
         } catch (BpsApiException $e) {
             $this->assertSame('Tidak bisa menghubungi server BPS.', $e->getMessage());
             $this->assertNull($e->httpStatus);
-            $this->assertInstanceOf(\Illuminate\Http\Client\ConnectionException::class, $e->getPrevious());
-            $this->assertSame('Connection timed out', $e->getPrevious()->getMessage());
+            $this->assertStringContainsString('Could not resolve host', $e->cause);
+            $this->assertStringNotContainsString('kunci-rahasia', $e->cause);
         }
     }
 }

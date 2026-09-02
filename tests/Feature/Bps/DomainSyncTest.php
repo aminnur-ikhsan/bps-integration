@@ -130,4 +130,56 @@ class DomainSyncTest extends TestCase
 
         $this->assertSame(0, $result->count);
     }
+
+    public function test_a_connection_failure_logs_the_redacted_cause_not_the_generic_message(): void
+    {
+        // Key tetap diikat ke nilai yang diketahui supaya penyamaran benar-benar teruji.
+        $this->app->instance(
+            \App\Services\Bps\BpsClient::class,
+            new \App\Services\Bps\BpsClient('https://webapi.bps.go.id/v1/api', 'kunci-rahasia'),
+        );
+
+        Http::fake(function () {
+            throw new \Illuminate\Http\Client\ConnectionException(
+                'cURL error 6: Could not resolve host for https://webapi.bps.go.id/v1/api/domain?key=kunci-rahasia'
+            );
+        });
+
+        try {
+            app(DomainSync::class)->sync();
+            $this->fail('Seharusnya melempar BpsApiException.');
+        } catch (BpsApiException $e) {
+            // diharapkan
+        }
+
+        $log = BpsFetchLog::latest('id')->first();
+
+        $this->assertStringContainsString('Could not resolve host', $log->error);
+        $this->assertStringNotContainsString('kunci-rahasia', $log->error);
+    }
+
+    public function test_a_malformed_row_is_reported_as_a_failure_instead_of_crashing(): void
+    {
+        Http::fake([
+            '*' => Http::response([
+                'status' => 'OK',
+                'data-availability' => 'available',
+                'data' => [
+                    ['page' => 1, 'pages' => 1, 'total' => 1],
+                    [['domain_id' => 'TEST-0001']],
+                ],
+            ]),
+        ]);
+
+        try {
+            app(DomainSync::class)->sync();
+            $this->fail('Seharusnya melempar BpsApiException.');
+        } catch (BpsApiException $e) {
+            // diharapkan
+        }
+
+        $log = BpsFetchLog::latest('id')->first();
+
+        $this->assertSame('failed', $log->status);
+    }
 }

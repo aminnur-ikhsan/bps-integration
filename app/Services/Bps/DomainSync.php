@@ -50,6 +50,12 @@ class DomainSync
             $pagination = $body['data'][0] ?? [];
             $items = $body['data'][1] ?? [];
 
+            foreach ($items as $item) {
+                if (! is_array($item) || ! isset($item['domain_id'], $item['domain_name'])) {
+                    throw new BpsApiException('Bentuk data domain dari BPS tidak dikenali.');
+                }
+            }
+
             $rows = array_merge($rows, $items);
             $lastPage = (int) ($pagination['pages'] ?? 1);
             $page++;
@@ -97,7 +103,7 @@ class DomainSync
             'http_status' => $error?->httpStatus,
             'records_count' => $count,
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'error' => $error?->getMessage(),
+            'error' => $error?->cause ?? $error?->getMessage(),
             'created_at' => now(),
         ]);
     }

@@ -25,10 +25,12 @@ class BpsClient
                 ->retry(2, 500, throw: false)
                 ->get($path, array_merge($query, ['key' => $this->key]));
         } catch (ConnectionException $e) {
-            // Server tidak menjawab sama sekali. Dibungkus supaya pemanggil cukup
-            // menangkap satu jenis exception; aslinya dirantai supaya penyebabnya
-            // — DNS gagal, koneksi ditolak, timeout — tidak hilang dari log.
-            throw new BpsApiException('Tidak bisa menghubungi server BPS.', previous: $e);
+            // Pesan Guzzle memuat URL lengkap berikut API key-nya, jadi key
+            // disamarkan sebelum penyebabnya ikut dicatat.
+            throw new BpsApiException(
+                'Tidak bisa menghubungi server BPS.',
+                cause: str_replace($this->key, '***', $e->getMessage()),
+            );
         }
 
         if ($response->failed()) {

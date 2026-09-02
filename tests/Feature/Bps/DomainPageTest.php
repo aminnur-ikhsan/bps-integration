@@ -74,6 +74,8 @@ class DomainPageTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
+        BpsDomain::query()->delete();
+
         foreach ([['TEST-0002', 'Uji Aceh'], ['TEST-0003', 'Uji Jawa Timur']] as [$id, $name]) {
             BpsDomain::create([
                 'domain_id' => $id,
