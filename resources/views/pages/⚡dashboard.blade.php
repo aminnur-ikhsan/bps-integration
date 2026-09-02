@@ -19,9 +19,11 @@ new #[Title('Dashboard')] class extends Component {
         // max() melewati cast Eloquent, jadi yang kembali string mentah.
         $value = BpsDomain::max('last_synced_at');
 
-        return $value
-            ? Date::parse($value)->locale('id')->translatedFormat('d F Y, H:i')
-            : null;
+        if ($value === null) {
+            return null;
+        }
+
+        return Date::parse($value)->locale('id')->translatedFormat('d F Y, H:i');
     }
 }; ?>
 

@@ -5,7 +5,6 @@ namespace App\Services\Bps;
 use App\Models\BpsDomain;
 use App\Models\BpsFetchLog;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\DB;
 
 class DomainSync
 {
@@ -20,7 +19,7 @@ class DomainSync
             $rows = $this->fetchAllPages($type);
             $syncedAt = now();
 
-            DB::transaction(fn () => $this->store($rows, $type, $syncedAt));
+            $this->store($rows, $type, $syncedAt);
 
             $this->log($params, 'success', count($rows), $startedAt, $userId);
 
@@ -32,11 +31,7 @@ class DomainSync
         }
     }
 
-    /**
-     * BPS membagi hasil per halaman, jadi diambil sampai halaman terakhir.
-     *
-     * @return array<int, array<string, mixed>>
-     */
+    // BPS membagi hasil per halaman, jadi diambil sampai halaman terakhir.
     private function fetchAllPages(string $type): array
     {
         $rows = [];
@@ -67,24 +62,25 @@ class DomainSync
         return $rows;
     }
 
-    /**
-     * @param  array<int, array<string, mixed>>  $rows
-     */
     private function store(array $rows, string $type, CarbonInterface $syncedAt): void
     {
         if ($rows === []) {
             return;
         }
 
-        $records = array_map(fn (array $row) => [
-            'domain_id' => $row['domain_id'],
-            'domain_name' => $row['domain_name'],
-            'domain_url' => $row['domain_url'] ?? null,
-            'type' => $type,
-            'last_synced_at' => $syncedAt,
-            'created_at' => $syncedAt,
-            'updated_at' => $syncedAt,
-        ], $rows);
+        $records = [];
+
+        foreach ($rows as $row) {
+            $records[] = [
+                'domain_id' => $row['domain_id'],
+                'domain_name' => $row['domain_name'],
+                'domain_url' => $row['domain_url'] ?? null,
+                'type' => $type,
+                'last_synced_at' => $syncedAt,
+                'created_at' => $syncedAt,
+                'updated_at' => $syncedAt,
+            ];
+        }
 
         BpsDomain::upsert(
             $records,
@@ -93,9 +89,6 @@ class DomainSync
         );
     }
 
-    /**
-     * @param  array<string, mixed>  $params
-     */
     private function log(
         array $params,
         string $status,
@@ -104,15 +97,23 @@ class DomainSync
         ?int $userId,
         ?BpsApiException $error = null,
     ): void {
+        $httpStatus = null;
+        $errorMessage = null;
+
+        if ($error !== null) {
+            $httpStatus = $error->httpStatus;
+            $errorMessage = $error->cause ?? $error->getMessage();
+        }
+
         BpsFetchLog::create([
             'user_id' => $userId,
             'endpoint' => 'domain',
             'params' => $params,
             'status' => $status,
-            'http_status' => $error?->httpStatus,
+            'http_status' => $httpStatus,
             'records_count' => $count,
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'error' => $error ? ($error->cause ?? $error->getMessage()) : null,
+            'error' => $errorMessage,
             'created_at' => now(),
         ]);
     }

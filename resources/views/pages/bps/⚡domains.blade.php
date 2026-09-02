@@ -41,15 +41,14 @@ new #[Title('Domain BPS')] class extends Component {
     #[Computed]
     public function domains()
     {
-        return BpsDomain::query()
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('domain_name', 'ilike', '%'.$this->search.'%')
-                        ->orWhere('domain_id', 'like', '%'.$this->search.'%');
-                });
-            })
-            ->orderBy('domain_id')
-            ->paginate(25);
+        $query = BpsDomain::query();
+
+        if ($this->search !== '') {
+            $query->where('domain_name', 'ilike', '%'.$this->search.'%')
+                ->orWhere('domain_id', 'ilike', '%'.$this->search.'%');
+        }
+
+        return $query->orderBy('domain_id')->paginate(25);
     }
 }; ?>
 
