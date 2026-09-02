@@ -11,3 +11,11 @@ parameters:
         - routes/
 
     level: 7
+
+    ignoreErrors:
+        # Trait ini dipakai oleh komponen Livewire di resources/views, yang tidak
+        # ikut dipindai karena berkas Blade bukan PHP murni. Jadi "tidak terpakai"
+        # di sini keliru, bukan kode mati.
+        -
+            identifier: trait.unused
+            path: app/Concerns/ProfileValidationRules.php
