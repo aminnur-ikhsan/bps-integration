@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\BpsDomain;
 use App\Models\BpsFetchLog;
+use Carbon\CarbonInterface;
 use Tests\TestCase;
 
 class BpsDomainTest extends TestCase
@@ -22,7 +23,7 @@ class BpsDomainTest extends TestCase
         // Dibaca ulang dari database, supaya yang diuji benar-benar cast-nya —
         // bukan objek yang memang sudah bertipe tanggal sejak sebelum disimpan.
         // Aplikasi memakai Date::use(CarbonImmutable), jadi yang dicek antarmukanya.
-        $this->assertInstanceOf(\Carbon\CarbonInterface::class, $domain->fresh()->last_synced_at);
+        $this->assertInstanceOf(CarbonInterface::class, $domain->fresh()->last_synced_at);
     }
 
     public function test_a_fetch_log_stores_its_params_as_an_array(): void

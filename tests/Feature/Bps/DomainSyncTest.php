@@ -5,7 +5,9 @@ namespace Tests\Feature\Bps;
 use App\Models\BpsDomain;
 use App\Models\BpsFetchLog;
 use App\Services\Bps\BpsApiException;
+use App\Services\Bps\BpsClient;
 use App\Services\Bps\DomainSync;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -135,12 +137,12 @@ class DomainSyncTest extends TestCase
     {
         // Key tetap diikat ke nilai yang diketahui supaya penyamaran benar-benar teruji.
         $this->app->instance(
-            \App\Services\Bps\BpsClient::class,
-            new \App\Services\Bps\BpsClient('https://webapi.bps.go.id/v1/api', 'kunci-rahasia'),
+            BpsClient::class,
+            new BpsClient('https://webapi.bps.go.id/v1/api', 'kunci-rahasia'),
         );
 
         Http::fake(function () {
-            throw new \Illuminate\Http\Client\ConnectionException(
+            throw new ConnectionException(
                 'cURL error 6: Could not resolve host for https://webapi.bps.go.id/v1/api/domain?key=kunci-rahasia'
             );
         });

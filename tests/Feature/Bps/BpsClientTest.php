@@ -4,6 +4,7 @@ namespace Tests\Feature\Bps;
 
 use App\Services\Bps\BpsApiException;
 use App\Services\Bps\BpsClient;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -72,7 +73,7 @@ class BpsClientTest extends TestCase
     public function test_it_throws_when_the_server_cannot_be_reached(): void
     {
         Http::fake(function () {
-            throw new \Illuminate\Http\Client\ConnectionException(
+            throw new ConnectionException(
                 'cURL error 6: Could not resolve host for https://webapi.bps.go.id/v1/api/domain?key=kunci-rahasia'
             );
         });
