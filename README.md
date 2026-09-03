@@ -59,25 +59,25 @@ docker compose --profile tools run --rm assets
 
 Prasyarat di server: Docker, Traefik yang sudah berjalan pada network `proxy`, dan container PostgreSQL pada network `pgnet`.
 
-Compose dipecah tiga. `docker-compose.yml` berisi yang berlaku di mana saja, `docker-compose.override.yml` dimuat otomatis di mesin pengembangan, dan `docker-compose.prod.yml` hanya dipakai di server. Karena itu perintah di server selalu menyebut dua berkas.
+Compose dipecah tiga:
 
-Supaya tidak perlu mengetik `-f` setiap kali, tambahkan baris ini ke `.env` server:
+| Berkas | Isi | Kapan dipakai |
+|---|---|---|
+| `docker-compose.yml` | service, image, volume | selalu |
+| `docker-compose.override.yml` | port untuk mesin pengembangan | otomatis di local |
+| `docker-compose.prod.yml` | label Traefik, network `proxy` dan `pgnet`, port server | hanya di server |
 
-```
-COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
-```
-
-Setelah itu `docker compose ...` di server otomatis memakai konfigurasi produksi.
+Berkas produksi **tidak** dimuat otomatis. Langkah 3 di bawah menyetel `COMPOSE_FILE` supaya `docker compose` di server selalu memakainya. Selama itu belum diset, setiap perintah `docker compose` akan memakai konfigurasi local — container tidak akan tergabung ke `pgnet` dan tidak akan punya label Traefik.
 
 ### Pertama kali
 
 1. Buat database di container PostgreSQL:
 
    ```bash
-   docker exec -it postgres-postgres-1 psql -U postgres -c "CREATE DATABASE bps_integration;"
+   docker exec -it <nama-container-postgres> psql -U postgres -c "CREATE DATABASE bps_integration;"
    ```
 
-2. Ambil kode dan siapkan `.env`:
+2. Ambil kode:
 
    ```bash
    git clone https://github.com/aminnur-ikhsan/bps-integration.git
@@ -85,23 +85,33 @@ Setelah itu `docker compose ...` di server otomatis memakai konfigurasi produksi
    cp .env.example .env
    ```
 
-   Selain variabel di tabel bagian local, isi juga:
+3. Setel `COMPOSE_FILE` dan UID — dua baris ini yang paling sering salah kalau diketik manual, jadi biarkan shell yang mengisinya:
+
+   ```bash
+   printf 'COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml
+DOCKER_UID=%s
+DOCKER_GID=%s
+' "$(id -u)" "$(id -g)" >> .env
+   ```
+
+   `DOCKER_UID` harus benar-benar UID milikmu, bukan angka yang diasumsikan. Container memakainya untuk menulis ke folder project; kalau tidak cocok, `composer install` dan `npm ci` gagal dengan `Permission denied`.
+
+4. Isi sisa `.env`. Selain variabel di tabel bagian local:
 
    | Variabel | Isi dengan |
    |---|---|
    | `APP_ENV` | `production` |
    | `APP_DEBUG` | `false` |
    | `APP_URL` | Alamat https lengkap aplikasi |
-   | `APP_DOMAIN` | Domain tanpa skema, dipakai Traefik untuk routing |
+   | `APP_DOMAIN` | Domain saja, tanpa `https://` — dipakai Traefik di dalam `Host(...)` |
    | `APP_PORT` | Port yang dijatahkan untuk project ini di server |
    | `LOG_LEVEL` | `warning` |
    | `DB_HOST` | Nama container PostgreSQL |
    | `DB_PORT` | `5432` — port di dalam network, bukan port host |
-   | `COMPOSE_FILE` | Seperti di atas |
 
    Ketik kunci dan password langsung di server. Jangan menyalin `.env` dari mesin lain.
 
-3. Nyalakan dan isi aplikasinya:
+5. Nyalakan dan isi aplikasinya:
 
    ```bash
    docker compose up -d --build
@@ -115,15 +125,15 @@ Setelah itu `docker compose ...` di server otomatis memakai konfigurasi produksi
    docker compose exec app php artisan view:cache
    ```
 
-4. Periksa lewat IP sebelum mengarahkan domain:
+6. Periksa lewat IP sebelum mengarahkan domain:
 
    ```bash
    curl -s -o /dev/null -w '%{http_code}\n' http://<IP-server>:<APP_PORT>/login
    ```
 
-   Harus `200`. Pastikan juga halaman error tidak menampilkan stack trace — kalau iya, `APP_DEBUG` masih hidup dan jangan lanjut sebelum diperbaiki.
+   Harus `200`, dan halaman error tidak boleh menampilkan stack trace. Kalau menampilkan, `APP_DEBUG` masih hidup — perbaiki sebelum melanjutkan.
 
-5. Arahkan A record domain ke IP server. Traefik mengambil sertifikat lewat HTTP challenge, jadi DNS harus menunjuk ke server lebih dulu. Setelah itu buka domainnya, login, dan klik `Fetch Data`.
+7. Arahkan A record domain ke IP server. Traefik mengambil sertifikat lewat HTTP challenge, jadi DNS harus menunjuk ke server lebih dulu. Setelah itu buka domainnya, login, dan klik `Fetch Data`.
 
 ### Deploy berikutnya
 
@@ -137,6 +147,36 @@ docker compose exec app php artisan route:cache
 docker compose exec app php artisan view:cache
 ```
 
-Setelah `config:cache`, perubahan pada `.env` tidak berpengaruh sampai cache dibangun ulang. Kalau mengubah `.env`, jalankan `php artisan config:clear` lalu `config:cache` lagi.
+Setelah `config:cache`, perubahan pada `.env` tidak berpengaruh sampai cache dibangun ulang: `php artisan config:clear` lalu `config:cache`.
 
 `APP_ENV=production` membuat Laravel menolak perintah yang merusak data seperti `migrate:fresh`, jadi perintah itu tidak bisa dijalankan di server.
+
+### Kalau ada yang gagal
+
+Tiga kegagalan ini yang benar-benar terjadi saat deploy pertama, beserta penyebabnya.
+
+**`Permission denied` saat `composer install` atau `npm ci`.** Container berjalan sebagai UID yang tidak punya izin tulis ke folder project. Bandingkan keduanya:
+
+```bash
+id -u; id -g
+docker compose exec app id
+```
+
+Kalau berbeda, perbaiki `DOCKER_UID` dan `DOCKER_GID` di `.env`, lalu `docker compose up -d --force-recreate` — UID ditetapkan saat container dibuat, jadi `restart` saja tidak cukup.
+
+**`could not translate host name` saat `migrate`.** Container app tidak berada di network yang sama dengan PostgreSQL, biasanya karena `COMPOSE_FILE` belum diset sehingga konfigurasi produksi tidak terpakai:
+
+```bash
+grep COMPOSE_FILE .env
+docker inspect bps_app --format '{{json .NetworkSettings.Networks}}'
+```
+
+Network app harus memuat `pgnet`. Kalau tidak, setel `COMPOSE_FILE` lalu `docker compose up -d --force-recreate`.
+
+**Halaman tampil tanpa CSS.** Aset ditulis dengan skema `http://` di halaman `https://`, dan browser memblokirnya sebagai mixed content. Periksa:
+
+```bash
+curl -s https://<domain>/login | grep -oE 'href="[^"]*\.css"' | head -1
+```
+
+Kalau muncul `http://`, berarti Laravel belum memercayai reverse proxy. `bootstrap/app.php` harus memanggil `trustProxies`; setelah mengubahnya jalankan `docker compose restart app`, karena berkas itu di luar jangkauan `config:cache`.
