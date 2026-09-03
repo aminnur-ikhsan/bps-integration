@@ -1,5 +1,4 @@
 <?php
-// database/migrations/2026_09_03_090002_move_bps_fetch_logs_to_data_bps_schema.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
