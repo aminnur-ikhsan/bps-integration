@@ -9,8 +9,9 @@ services:
       - pgnet
 
   nginx:
-    ports:
-      - "${APP_PORT:-8016}:80"
+    # Sengaja tanpa "ports". Aplikasi hanya dicapai lewat Traefik, jadi tidak ada
+    # jalur yang melewati HTTPS. Untuk memeriksa langsung dari dalam server:
+    #   docker compose exec nginx wget -qS -O /dev/null http://localhost/login
     networks:
       - internal
       - proxy

@@ -104,7 +104,6 @@ DOCKER_GID=%s
    | `APP_DEBUG` | `false` |
    | `APP_URL` | Alamat https lengkap aplikasi |
    | `APP_DOMAIN` | Domain saja, tanpa `https://` — dipakai Traefik di dalam `Host(...)` |
-   | `APP_PORT` | Port yang dijatahkan untuk project ini di server |
    | `LOG_LEVEL` | `warning` |
    | `DB_HOST` | Nama container PostgreSQL |
    | `DB_PORT` | `5432` — port di dalam network, bukan port host |
@@ -125,13 +124,13 @@ DOCKER_GID=%s
    docker compose exec app php artisan view:cache
    ```
 
-6. Periksa lewat IP sebelum mengarahkan domain:
+6. Periksa dari dalam server sebelum mengarahkan domain. Container nginx tidak membuka port ke host — itu disengaja, supaya tidak ada jalur masuk yang melewati HTTPS — jadi pemeriksaannya dilakukan dari dalam:
 
    ```bash
-   curl -s -o /dev/null -w '%{http_code}\n' http://<IP-server>:<APP_PORT>/login
+   docker compose exec nginx wget -qS -O /dev/null http://localhost/login
    ```
 
-   Harus `200`, dan halaman error tidak boleh menampilkan stack trace. Kalau menampilkan, `APP_DEBUG` masih hidup — perbaiki sebelum melanjutkan.
+   Harus membalas `HTTP/1.1 200 OK`, dan halaman error tidak boleh menampilkan stack trace. Kalau menampilkan, `APP_DEBUG` masih hidup — perbaiki sebelum melanjutkan.
 
 7. Arahkan A record domain ke IP server. Traefik mengambil sertifikat lewat HTTP challenge, jadi DNS harus menunjuk ke server lebih dulu. Setelah itu buka domainnya, login, dan klik `Fetch Data`.
 
