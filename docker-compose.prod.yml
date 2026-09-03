@@ -1,0 +1,36 @@
+# Konfigurasi server. Tidak dimuat otomatis — panggil eksplisit:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Atau set COMPOSE_FILE di .env server supaya cukup "docker compose up -d".
+services:
+  app:
+    # pgnet dipakai untuk memanggil container Postgres langsung sebagai hostname.
+    networks:
+      - internal
+      - pgnet
+
+  nginx:
+    ports:
+      - "${APP_PORT:-8016}:80"
+    networks:
+      - internal
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      # nginx berada di dua network, Traefik harus tahu lewat yang mana.
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.bps-integration.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.bps-integration.entrypoints=websecure"
+      - "traefik.http.routers.bps-integration.tls.certresolver=le"
+      - "traefik.http.services.bps-integration.loadbalancer.server.port=80"
+      # Permintaan http diarahkan ke https.
+      - "traefik.http.routers.bps-integration-http.rule=Host(`${APP_DOMAIN}`)"
+      - "traefik.http.routers.bps-integration-http.entrypoints=web"
+      - "traefik.http.routers.bps-integration-http.middlewares=bps-integration-https"
+      - "traefik.http.middlewares.bps-integration-https.redirectscheme.scheme=https"
+
+networks:
+  internal:
+  proxy:
+    external: true
+  pgnet:
+    external: true

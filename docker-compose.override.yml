@@ -1,0 +1,6 @@
+# Konfigurasi untuk mesin pengembangan. Compose memuat berkas ini otomatis,
+# jadi di local cukup "docker compose up -d" seperti biasa.
+services:
+  nginx:
+    ports:
+      - "${APP_PORT:-8080}:80"
