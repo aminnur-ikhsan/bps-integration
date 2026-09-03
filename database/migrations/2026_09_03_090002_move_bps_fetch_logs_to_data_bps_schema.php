@@ -11,6 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Jaga-jaga kalau tabel sudah ada di data_bps (misal setelah db:wipe lalu migrate ulang).
+        Schema::dropIfExists('data_bps.bps_fetch_logs');
+
         // Data lama sengaja tidak dipindahkan — aplikasi baru dipakai, isinya boleh hilang.
         Schema::dropIfExists('bps_fetch_logs');
 
