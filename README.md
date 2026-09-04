@@ -138,17 +138,29 @@ DOCKER_GID=%s
 
 ```bash
 git pull
+docker compose exec app php artisan down
 docker compose exec app composer install --no-dev --optimize-autoloader
 docker compose --profile tools run --rm assets
 docker compose exec app php artisan migrate --force
 docker compose exec app php artisan config:cache
 docker compose exec app php artisan route:cache
 docker compose exec app php artisan view:cache
+docker compose exec app php artisan up
 ```
+
+`artisan down` dipasang supaya kode baru tidak sempat aktif sebelum migrasinya jalan. Tanpa ini ada jeda di mana kode yang sudah memakai tabel baru bisa diakses padahal tabelnya belum dibuat, dan request langsung 500.
 
 Setelah `config:cache`, perubahan pada `.env` tidak berpengaruh sampai cache dibangun ulang: `php artisan config:clear` lalu `config:cache`.
 
 `APP_ENV=production` membuat Laravel menolak perintah yang merusak data seperti `migrate:fresh`, jadi perintah itu tidak bisa dijalankan di server.
+
+> **Catatan khusus rilis skema `data_bps`.** Deploy yang membawa migrasi `2026_09_03_090000`–`090002` (pemindahan `bps_domains` dan `bps_fetch_logs` ke schema `data_bps`) menghapus isi kedua tabel itu, bukan memindahkannya. Data domain bisa dipulihkan dengan menjalankan sync ulang lewat `Fetch Data`, tapi riwayat `bps_fetch_logs` hilang permanen dan tidak bisa diambil kembali. Ini bukan risiko tetap di setiap deploy — hanya berlaku untuk rilis yang membawa migrasi tersebut.
+
+> **Sebelum migrasi yang membuat schema baru** (seperti `data_bps` di atas), pastikan dulu role database aplikasi punya hak `CREATE` di database tersebut — kalau tidak, `migrate --force` gagal saat membuat schema. Cek dengan:
+>
+> ```bash
+> docker compose exec app php artisan tinker --execute="DB::statement('CREATE SCHEMA IF NOT EXISTS data_bps');"
+> ```
 
 ### Kalau ada yang gagal
 

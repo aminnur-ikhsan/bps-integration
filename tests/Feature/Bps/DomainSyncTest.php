@@ -37,8 +37,8 @@ class DomainSyncTest extends TestCase
         $result = app(DomainSync::class)->sync();
 
         $this->assertSame(2, $result->count);
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh']);
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0001', 'domain_name' => 'Uji Pusat']);
+        $this->assertDatabaseHas('data_bps.bps_domains', ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh']);
+        $this->assertDatabaseHas('data_bps.bps_domains', ['domain_id' => 'TEST-0001', 'domain_name' => 'Uji Pusat']);
     }
 
     public function test_syncing_twice_updates_instead_of_duplicating(): void
