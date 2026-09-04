@@ -1,0 +1,88 @@
+name: Deploy ke Server
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Masuk ke server dan update kode
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ secrets.PESONA_IP }}
+          username: ${{ secrets.PESONA_USERNAME }}
+          key: ${{ secrets.PESONA_SSH_KEY }}
+          script: |
+            set -e
+            export GIT_TERMINAL_PROMPT=0
+            cd ${{ secrets.BPS_PROJECT_PATH }}
+
+            git fetch origin main
+            git pull origin main
+
+            docker compose build
+            docker compose up -d
+
+            docker compose exec -T app composer install --no-dev --optimize-autoloader
+            docker compose --profile tools run --rm assets
+            docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+
+      # ================= SUCCESS NOTIFICATION =================
+      - name: Telegram Notify Success
+        if: success()
+        env:
+          RAW_COMMIT: ${{ github.event.head_commit.message }}
+          AUTHOR_USERNAME: ${{ github.actor }}
+        run: |
+          ACTION=$(echo "$RAW_COMMIT" | sed -n '1p')
+          if [[ "$ACTION" == "Merge pull request"* ]]; then
+            TITLE=$(echo "$RAW_COMMIT" | sed -n '3p')
+          else
+            TITLE="$ACTION"
+            ACTION="Direct push"
+          fi
+
+          REPO="${{ github.repository }}"
+          COMMIT_URL="https://github.com/${REPO}/commit/${{ github.sha }}"
+          REPO_URL="https://github.com/${REPO}"
+          AUTHOR_URL="https://github.com/${AUTHOR_USERNAME}"
+
+          MESSAGE=$(printf "🚀 <b>DEPLOY BPS INTEGRATION SUCCESS</b>\n📝 <b>Title:</b> %s\n🔀 <b>Action:</b> %s\n📦 <b>Repository:</b> <a href=\"%s\">%s</a>\n🌱 <b>Target Branch:</b> main\n👷 <b>Merged by:</b> <a href=\"%s\">%s</a>\n🔗 <b>Commit URL:</b> %s" \
+            "$TITLE" \
+            "$ACTION" \
+            "$REPO_URL" "$REPO" \
+            "$AUTHOR_URL" "$AUTHOR_USERNAME" \
+            "$COMMIT_URL")
+
+          curl -s -X POST ${{ secrets.URL_TELEGRAM }} \
+            -H "Authorization: Bearer ${{ secrets.CLIENT_TOKEN }}" \
+            -d message="$MESSAGE" \
+            -d parse_mode=HTML
+
+      # ================= FAILED NOTIFICATION =================
+      - name: Telegram Notify Failed
+        if: failure()
+        env:
+          RAW_COMMIT: ${{ github.event.head_commit.message }}
+          AUTHOR_USERNAME: ${{ github.actor }}
+        run: |
+          TITLE=$(echo "$RAW_COMMIT" | sed -n '1p')
+          REPO="${{ github.repository }}"
+
+          MESSAGE=$(printf "❌ <b>DEPLOY BPS INTEGRATION FAILED</b>\n🔖 <b>Commit:</b> %s\n📂 <b>Repository:</b> %s\n🌱 <b>Target Branch:</b> main\n👤 <b>Merged by:</b> %s\n⚠️ <b>Action:</b> Cek server & log runner" \
+            "$TITLE" "$REPO" "$AUTHOR_USERNAME")
+
+          curl -s -X POST ${{ secrets.URL_TELEGRAM }} \
+            -H "Authorization: Bearer ${{ secrets.CLIENT_TOKEN }}" \
+            -d message="$MESSAGE" \
+            -d parse_mode=HTML
