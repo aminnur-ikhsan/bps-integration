@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class BpsDomain extends Model
 {
+    protected $table = 'data_bps.bps_domains';
+
     protected $fillable = [
         'domain_id',
         'domain_name',

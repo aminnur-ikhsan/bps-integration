@@ -19,7 +19,7 @@ class BpsDomainTest extends TestCase
             'last_synced_at' => now(),
         ]);
 
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh']);
+        $this->assertDatabaseHas('data_bps.bps_domains', ['domain_id' => 'TEST-0002', 'domain_name' => 'Uji Aceh']);
         // Dibaca ulang dari database, supaya yang diuji benar-benar cast-nya —
         // bukan objek yang memang sudah bertipe tanggal sejak sebelum disimpan.
         // Aplikasi memakai Date::use(CarbonImmutable), jadi yang dicek antarmukanya.

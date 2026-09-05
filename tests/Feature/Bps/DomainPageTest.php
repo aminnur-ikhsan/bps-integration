@@ -53,7 +53,7 @@ class DomainPageTest extends TestCase
 
         Livewire::test('pages::bps.domains')->call('fetchData');
 
-        $this->assertDatabaseHas('bps_domains', ['domain_id' => 'TEST-0002']);
+        $this->assertDatabaseHas('data_bps.bps_domains', ['domain_id' => 'TEST-0002']);
     }
 
     public function test_a_failed_fetch_shows_a_message_instead_of_crashing(): void
