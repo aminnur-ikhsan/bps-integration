@@ -54,8 +54,7 @@ new class extends Component {
     }
 }; ?>
 
-<x-layouts.app>
-    <flux:main>
+<div>
         <flux:heading size="xl">Derived Periods</flux:heading>
         <flux:subheading>Daftar periode turunan (misal kuartal, bulan) dari BPS.</flux:subheading>
 
@@ -121,5 +120,4 @@ new class extends Component {
         <div class="mt-4">
             {{ $turths->links() }}
         </div>
-    </flux:main>
-</x-layouts.app>
+</div>

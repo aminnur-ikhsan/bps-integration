@@ -54,8 +54,7 @@ new class extends Component {
     }
 }; ?>
 
-<x-layouts.app>
-    <flux:main>
+<div>
         <flux:heading size="xl">Periods</flux:heading>
         <flux:subheading>Daftar periode (tahun) dari BPS.</flux:subheading>
 
@@ -119,5 +118,4 @@ new class extends Component {
         <div class="mt-4">
             {{ $periods->links() }}
         </div>
-    </flux:main>
-</x-layouts.app>
+</div>

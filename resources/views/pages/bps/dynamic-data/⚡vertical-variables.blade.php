@@ -54,8 +54,7 @@ new class extends Component {
     }
 }; ?>
 
-<x-layouts.app>
-    <flux:main>
+<div>
         <flux:heading size="xl">Vertical Variables</flux:heading>
         <flux:subheading>Daftar variabel vertikal (baris) dari BPS.</flux:subheading>
 
@@ -121,5 +120,4 @@ new class extends Component {
         <div class="mt-4">
             {{ $vervars->links() }}
         </div>
-    </flux:main>
-</x-layouts.app>
+</div>

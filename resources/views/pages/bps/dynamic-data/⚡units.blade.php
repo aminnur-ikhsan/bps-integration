@@ -42,8 +42,7 @@ new class extends Component {
     }
 }; ?>
 
-<x-layouts.app>
-    <flux:main>
+<div>
         <flux:heading size="xl">Units</flux:heading>
         <flux:subheading>Daftar satuan (unit) dari BPS.</flux:subheading>
 
@@ -98,5 +97,4 @@ new class extends Component {
         <div class="mt-4">
             {{ $units->links() }}
         </div>
-    </flux:main>
-</x-layouts.app>
+</div>
