@@ -47,23 +47,23 @@ new #[Title('Dashboard')] class extends Component {
 <div class="flex h-full w-full flex-1 flex-col gap-6">
     <flux:heading size="xl">{{ __('Dashboard') }}</flux:heading>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+    <div class="flex flex-wrap gap-4">
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
             <flux:text class="text-sm">{{ __('Domain tersimpan') }}</flux:text>
             <flux:heading size="lg" class="mt-1">{{ $this->domainCount }}</flux:heading>
         </div>
 
-        <div class="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
             <flux:text class="text-sm">{{ __('Kategori Subjek') }}</flux:text>
             <flux:heading size="lg" class="mt-1">{{ $this->categoryCount }}</flux:heading>
         </div>
 
-        <div class="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
             <flux:text class="text-sm">{{ __('Subjek tersimpan') }}</flux:text>
             <flux:heading size="lg" class="mt-1">{{ $this->subjectCount }}</flux:heading>
         </div>
 
-        <div class="rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
             <flux:text class="text-sm">{{ __('Sync terakhir') }}</flux:text>
             <flux:heading size="lg" class="mt-1">{{ $this->lastSyncedAt ?? '—' }}</flux:heading>
         </div>
