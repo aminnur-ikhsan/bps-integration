@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\BpsDomain;
+use App\Models\BpsSubjectCategory;
+use App\Models\BpsSubject;
 use Illuminate\Support\Facades\Date;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -14,26 +16,51 @@ new #[Title('Dashboard')] class extends Component {
     }
 
     #[Computed]
+    public function categoryCount(): int
+    {
+        return BpsSubjectCategory::count();
+    }
+
+    #[Computed]
+    public function subjectCount(): int
+    {
+        return BpsSubject::count();
+    }
+
+    #[Computed]
     public function lastSyncedAt(): ?string
     {
-        // max() melewati cast Eloquent, jadi yang kembali string mentah.
-        $value = BpsDomain::max('last_synced_at');
+        $domainSync = BpsDomain::max('last_synced_at');
+        $catSync = BpsSubjectCategory::max('last_synced_at');
+        $subSync = BpsSubject::max('last_synced_at');
 
-        if ($value === null) {
+        $max = max(array_filter([$domainSync, $catSync, $subSync]));
+
+        if (empty($max)) {
             return null;
         }
 
-        return Date::parse($value)->locale('id')->translatedFormat('d F Y, H:i');
+        return Date::parse($max)->locale('id')->translatedFormat('d F Y, H:i');
     }
 }; ?>
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
     <flux:heading size="xl">{{ __('Dashboard') }}</flux:heading>
 
-    <div class="grid gap-4 md:grid-cols-3">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-700">
             <flux:text>{{ __('Domain tersimpan') }}</flux:text>
             <flux:heading size="xl" class="mt-2">{{ $this->domainCount }}</flux:heading>
+        </div>
+
+        <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-700">
+            <flux:text>{{ __('Kategori Subjek') }}</flux:text>
+            <flux:heading size="xl" class="mt-2">{{ $this->categoryCount }}</flux:heading>
+        </div>
+
+        <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-700">
+            <flux:text>{{ __('Subjek tersimpan') }}</flux:text>
+            <flux:heading size="xl" class="mt-2">{{ $this->subjectCount }}</flux:heading>
         </div>
 
         <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-700">
@@ -42,3 +69,4 @@ new #[Title('Dashboard')] class extends Component {
         </div>
     </div>
 </div>
+
