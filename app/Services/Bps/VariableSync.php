@@ -13,6 +13,7 @@ class VariableSync
 
     public function sync(string $domainId, ?int $userId = null): SyncResult
     {
+        set_time_limit(300); // Prevent PHP timeout for sequential API fetches
         $startedAt = microtime(true);
         $params = [
             'model'  => 'var',

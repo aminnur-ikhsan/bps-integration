@@ -13,6 +13,7 @@ class PeriodSync
 
     public function sync(string $domainId, ?int $varId = null, ?int $userId = null): SyncResult
     {
+        set_time_limit(300);
         $startedAt = microtime(true);
         $params = array_filter([
             'model'  => 'th',

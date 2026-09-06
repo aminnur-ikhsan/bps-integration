@@ -13,6 +13,7 @@ class UnitSync
 
     public function sync(string $domainId, ?int $userId = null): SyncResult
     {
+        set_time_limit(300);
         $startedAt = microtime(true);
         $params = [
             'model'  => 'unit',
