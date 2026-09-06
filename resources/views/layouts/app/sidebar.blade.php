@@ -19,6 +19,14 @@
                     <flux:sidebar.item icon="table-cells" :href="route('bps.domains')" :current="request()->routeIs('bps.domains')" wire:navigate>
                         {{ __('Domain BPS') }}
                     </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="list-bullet" :href="route('bps.subject-categories')" :current="request()->routeIs('bps.subject-categories')" wire:navigate>
+                        {{ __('Kategori Subjek') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="document-text" :href="route('bps.subjects')" :current="request()->routeIs('bps.subjects')" wire:navigate>
+                        {{ __('Subjek BPS') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\BpsDomain;
+use App\Models\BpsSubjectCategory;
+use App\Models\BpsSubject;
 use Illuminate\Support\Facades\Date;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -14,31 +16,57 @@ new #[Title('Dashboard')] class extends Component {
     }
 
     #[Computed]
+    public function categoryCount(): int
+    {
+        return BpsSubjectCategory::count();
+    }
+
+    #[Computed]
+    public function subjectCount(): int
+    {
+        return BpsSubject::count();
+    }
+
+    #[Computed]
     public function lastSyncedAt(): ?string
     {
-        // max() melewati cast Eloquent, jadi yang kembali string mentah.
-        $value = BpsDomain::max('last_synced_at');
+        $values = array_filter([
+            BpsDomain::max('last_synced_at'),
+            BpsSubjectCategory::max('last_synced_at'),
+            BpsSubject::max('last_synced_at'),
+        ]);
 
-        if ($value === null) {
+        if (empty($values)) {
             return null;
         }
 
-        return Date::parse($value)->locale('id')->translatedFormat('d F Y, H:i');
+        return Date::parse(max($values))->locale('id')->translatedFormat('d F Y, H:i');
     }
 }; ?>
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
     <flux:heading size="xl">{{ __('Dashboard') }}</flux:heading>
 
-    <div class="grid gap-4 md:grid-cols-3">
-        <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-700">
-            <flux:text>{{ __('Domain tersimpan') }}</flux:text>
-            <flux:heading size="xl" class="mt-2">{{ $this->domainCount }}</flux:heading>
+    <div class="flex flex-wrap gap-4">
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+            <flux:text class="text-sm">{{ __('Domain tersimpan') }}</flux:text>
+            <flux:heading size="lg" class="mt-1">{{ $this->domainCount }}</flux:heading>
         </div>
 
-        <div class="rounded-xl border border-neutral-200 p-6 dark:border-neutral-700">
-            <flux:text>{{ __('Sync terakhir') }}</flux:text>
-            <flux:heading size="xl" class="mt-2">{{ $this->lastSyncedAt ?? '—' }}</flux:heading>
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+            <flux:text class="text-sm">{{ __('Kategori Subjek') }}</flux:text>
+            <flux:heading size="lg" class="mt-1">{{ $this->categoryCount }}</flux:heading>
+        </div>
+
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+            <flux:text class="text-sm">{{ __('Subjek tersimpan') }}</flux:text>
+            <flux:heading size="lg" class="mt-1">{{ $this->subjectCount }}</flux:heading>
+        </div>
+
+        <div class="flex-1 min-w-48 rounded-xl border border-neutral-200 p-4 dark:border-neutral-700">
+            <flux:text class="text-sm">{{ __('Sync terakhir') }}</flux:text>
+            <flux:heading size="lg" class="mt-1">{{ $this->lastSyncedAt ?? '—' }}</flux:heading>
         </div>
     </div>
 </div>
+
