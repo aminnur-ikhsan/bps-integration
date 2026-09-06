@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
+ * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
+ *
+ * @extends BelongsTo<TRelatedModel, TDeclaringModel>
+ */
 class CompositeBelongsTo extends BelongsTo
 {
     protected $compositeLocalKey;
