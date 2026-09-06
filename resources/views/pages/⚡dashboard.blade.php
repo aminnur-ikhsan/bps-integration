@@ -30,17 +30,17 @@ new #[Title('Dashboard')] class extends Component {
     #[Computed]
     public function lastSyncedAt(): ?string
     {
-        $domainSync = BpsDomain::max('last_synced_at');
-        $catSync = BpsSubjectCategory::max('last_synced_at');
-        $subSync = BpsSubject::max('last_synced_at');
+        $values = array_filter([
+            BpsDomain::max('last_synced_at'),
+            BpsSubjectCategory::max('last_synced_at'),
+            BpsSubject::max('last_synced_at'),
+        ]);
 
-        $max = max(array_filter([$domainSync, $catSync, $subSync]));
-
-        if (empty($max)) {
+        if (empty($values)) {
             return null;
         }
 
-        return Date::parse($max)->locale('id')->translatedFormat('d F Y, H:i');
+        return Date::parse(max($values))->locale('id')->translatedFormat('d F Y, H:i');
     }
 }; ?>
 
