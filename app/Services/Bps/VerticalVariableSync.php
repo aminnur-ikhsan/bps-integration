@@ -52,7 +52,7 @@ class VerticalVariableSync
             $items      = $body['data'][1] ?? [];
 
             foreach ($items as $item) {
-                if (! is_array($item) || ! isset($item['vervar_id'], $item['vervar'])) {
+                if (! is_array($item) || ! isset($item['kode_ver_id'], $item['vervar'])) {
                     throw new BpsApiException('Bentuk data vertical variable dari BPS tidak dikenali.');
                 }
             }
@@ -77,7 +77,7 @@ class VerticalVariableSync
             $records[] = [
                 'domain_id'         => $domainId,
                 'var_id'            => $varId,
-                'vervar_id'         => $row['vervar_id'],
+                'vervar_id'         => $row['kode_ver_id'],
                 'vervar'            => $row['vervar'],
                 'item_ver_id'       => $row['item_ver_id'] ?? null,
                 'group_ver_id'      => $row['group_ver_id'] ?? null,
