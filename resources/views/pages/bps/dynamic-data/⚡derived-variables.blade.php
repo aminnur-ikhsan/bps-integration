@@ -6,7 +6,7 @@ use App\Models\BpsVariable;
 use App\Models\BpsDerivedVariable;
 use App\Services\Bps\DerivedVariableSync;
 use App\Services\Bps\BpsApiException;
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 
 new class extends Component {

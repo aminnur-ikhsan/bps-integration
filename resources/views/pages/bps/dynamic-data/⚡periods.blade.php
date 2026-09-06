@@ -6,7 +6,7 @@ use App\Models\BpsVariable;
 use App\Models\BpsPeriod;
 use App\Services\Bps\PeriodSync;
 use App\Services\Bps\BpsApiException;
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 
 new class extends Component {
