@@ -6,10 +6,11 @@ use App\Models\BpsVariable;
 use App\Models\BpsDerivedPeriod;
 use App\Services\Bps\DerivedPeriodSync;
 use App\Services\Bps\BpsApiException;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-new class extends Component {
+new #[Title('Derived Periods')] class extends Component {
     use WithPagination;
 
     public string $domainId = '3200';

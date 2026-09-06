@@ -5,10 +5,11 @@ use App\Models\BpsDomain;
 use App\Models\BpsUnit;
 use App\Services\Bps\UnitSync;
 use App\Services\Bps\BpsApiException;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-new class extends Component {
+new #[Title('Units')] class extends Component {
     use WithPagination;
 
     public string $domainId = '3200';

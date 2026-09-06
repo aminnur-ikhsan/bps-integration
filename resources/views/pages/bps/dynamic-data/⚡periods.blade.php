@@ -6,10 +6,11 @@ use App\Models\BpsVariable;
 use App\Models\BpsPeriod;
 use App\Services\Bps\PeriodSync;
 use App\Services\Bps\BpsApiException;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
-new class extends Component {
+new #[Title('Periods')] class extends Component {
     use WithPagination;
 
     public string $domainId = '3200';
