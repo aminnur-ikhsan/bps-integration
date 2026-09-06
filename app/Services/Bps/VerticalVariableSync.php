@@ -90,8 +90,8 @@ class VerticalVariableSync
 
         BpsVerticalVariable::upsert(
             $records,
-            ['domain_id', 'vervar_id'],
-            ['var_id', 'vervar', 'item_ver_id', 'group_ver_id', 'name_group_ver_id', 'last_synced_at', 'updated_at'],
+            ['domain_id', 'vervar_id', 'item_ver_id'],
+            ['var_id', 'vervar', 'group_ver_id', 'name_group_ver_id', 'last_synced_at', 'updated_at'],
         );
     }
 
