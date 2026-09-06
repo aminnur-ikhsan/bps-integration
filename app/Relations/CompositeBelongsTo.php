@@ -49,4 +49,17 @@ class CompositeBelongsTo extends BelongsTo
 
         return $models;
     }
+
+    public function getRelationExistenceQuery(\Illuminate\Database\Eloquent\Builder $query, \Illuminate\Database\Eloquent\Builder $parentQuery, $columns = ['*'])
+    {
+        $query = parent::getRelationExistenceQuery($query, $parentQuery, $columns);
+        
+        $query->whereColumn(
+            $query->qualifyColumn($this->compositeOwnerKey),
+            '=',
+            $parentQuery->qualifyColumn($this->compositeLocalKey)
+        );
+
+        return $query;
+    }
 }

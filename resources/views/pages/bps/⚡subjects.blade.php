@@ -13,6 +13,7 @@ new #[Title('Subjek BPS')] class extends Component {
     use WithPagination;
 
     public string $domainId = '3200';
+    public $subcatId = '';
     public string $search = '';
 
     public string $message = '';
@@ -39,6 +40,13 @@ new #[Title('Subjek BPS')] class extends Component {
         $this->resetPage();
         $this->message = '';
         $this->failed = false;
+        $this->subcatId = '';
+        $this->search = '';
+    }
+
+    public function updatedSubcatId(): void
+    {
+        $this->resetPage();
     }
 
     public function updatedSearch(): void
@@ -53,14 +61,29 @@ new #[Title('Subjek BPS')] class extends Component {
     }
 
     #[Computed]
+    public function categories()
+    {
+        return \App\Models\BpsSubjectCategory::where('domain_id', $this->domainId)
+            ->orderBy('title')
+            ->get();
+    }
+
+    #[Computed]
     public function subjects()
     {
         $query = BpsSubject::with('category')->where('domain_id', $this->domainId);
 
+        if ($this->subcatId !== '') {
+            $query->where('subcat_id', $this->subcatId);
+        }
+
         if ($this->search !== '') {
             $query->where(function ($q) {
                 $q->where('title', 'ilike', '%'.$this->search.'%')
-                  ->orWhere('sub_id', 'ilike', '%'.$this->search.'%');
+                  ->orWhere('sub_id', 'ilike', '%'.$this->search.'%')
+                  ->orWhereHas('category', function ($qc) {
+                      $qc->where('title', 'ilike', '%'.$this->search.'%');
+                  });
             });
         }
 
@@ -89,6 +112,14 @@ new #[Title('Subjek BPS')] class extends Component {
             <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
                 @foreach ($this->domains as $domain)
                     <flux:select.option value="{{ $domain->domain_id }}">{{ $domain->domain_name }} ({{ $domain->domain_id }})</flux:select.option>
+                @endforeach
+            </flux:select>
+        </div>
+        <div class="w-64">
+            <flux:select wire:model.live="subcatId" placeholder="Semua Kategori">
+                <flux:select.option value="">Semua Kategori</flux:select.option>
+                @foreach ($this->categories as $category)
+                    <flux:select.option value="{{ $category->subcat_id }}">{{ $category->title }}</flux:select.option>
                 @endforeach
             </flux:select>
         </div>
