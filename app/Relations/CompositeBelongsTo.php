@@ -2,12 +2,14 @@
 
 namespace App\Relations;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CompositeBelongsTo extends BelongsTo
 {
     protected $compositeLocalKey;
+
     protected $compositeOwnerKey;
 
     public function __construct($query, $child, $foreignKey, $ownerKey, $compositeLocalKey, $compositeOwnerKey, $relation)
@@ -50,10 +52,10 @@ class CompositeBelongsTo extends BelongsTo
         return $models;
     }
 
-    public function getRelationExistenceQuery(\Illuminate\Database\Eloquent\Builder $query, \Illuminate\Database\Eloquent\Builder $parentQuery, $columns = ['*'])
+    public function getRelationExistenceQuery(Builder $query, Builder $parentQuery, $columns = ['*'])
     {
         $query = parent::getRelationExistenceQuery($query, $parentQuery, $columns);
-        
+
         $query->whereColumn(
             $query->qualifyColumn($this->compositeOwnerKey),
             '=',

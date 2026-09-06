@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Relations\CompositeBelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -37,7 +38,7 @@ class BpsSubject extends Model
     {
         $instance = $this->newRelatedInstance(BpsSubjectCategory::class);
 
-        return new \App\Relations\CompositeBelongsTo(
+        return new CompositeBelongsTo(
             $instance->newQuery(),
             $this,
             'subcat_id',

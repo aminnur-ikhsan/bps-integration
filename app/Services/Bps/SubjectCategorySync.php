@@ -2,8 +2,8 @@
 
 namespace App\Services\Bps;
 
-use App\Models\BpsSubjectCategory;
 use App\Models\BpsFetchLog;
+use App\Models\BpsSubjectCategory;
 use Carbon\CarbonInterface;
 
 class SubjectCategorySync
