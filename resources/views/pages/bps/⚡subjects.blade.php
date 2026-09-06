@@ -132,6 +132,7 @@ new #[Title('Subjek BPS')] class extends Component {
         <table class="w-full text-left text-sm">
             <thead class="border-b border-neutral-200 dark:border-neutral-700">
                 <tr>
+                    <th class="px-4 py-3 font-medium">{{ __('No.') }}</th>
                     <th class="px-4 py-3 font-medium">{{ __('ID Subjek') }}</th>
                     <th class="px-4 py-3 font-medium">{{ __('Judul') }}</th>
                     <th class="px-4 py-3 font-medium">{{ __('Kategori') }}</th>
@@ -141,6 +142,7 @@ new #[Title('Subjek BPS')] class extends Component {
             <tbody>
                 @forelse ($this->subjects as $subject)
                     <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
+                        <td class="px-4 py-3 text-neutral-500">{{ $this->subjects->firstItem() + $loop->index }}</td>
                         <td class="px-4 py-3">{{ $subject->sub_id }}</td>
                         <td class="px-4 py-3">{{ $subject->title }}</td>
                         <td class="px-4 py-3">
@@ -154,7 +156,7 @@ new #[Title('Subjek BPS')] class extends Component {
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-4 py-6 text-center">
+                        <td colspan="5" class="px-4 py-6 text-center">
                             {{ __('Belum ada data untuk wilayah ini. Klik Fetch Data untuk mengambil dari BPS.') }}
                         </td>
                     </tr>

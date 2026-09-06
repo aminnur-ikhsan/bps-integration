@@ -101,6 +101,7 @@ new #[Title('Kategori Subjek BPS')] class extends Component {
         <table class="w-full text-left text-sm">
             <thead class="border-b border-neutral-200 dark:border-neutral-700">
                 <tr>
+                    <th class="px-4 py-3 font-medium">{{ __('No.') }}</th>
                     <th class="px-4 py-3 font-medium">{{ __('ID Kategori') }}</th>
                     <th class="px-4 py-3 font-medium">{{ __('Judul') }}</th>
                     <th class="px-4 py-3 font-medium">{{ __('Sync terakhir') }}</th>
@@ -109,13 +110,14 @@ new #[Title('Kategori Subjek BPS')] class extends Component {
             <tbody>
                 @forelse ($this->categories as $category)
                     <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
+                        <td class="px-4 py-3 text-neutral-500">{{ $this->categories->firstItem() + $loop->index }}</td>
                         <td class="px-4 py-3">{{ $category->subcat_id }}</td>
                         <td class="px-4 py-3">{{ $category->title }}</td>
                         <td class="px-4 py-3">{{ $category->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="px-4 py-6 text-center">
+                        <td colspan="4" class="px-4 py-6 text-center">
                             {{ __('Belum ada data untuk wilayah ini. Klik Fetch Data untuk mengambil dari BPS.') }}
                         </td>
                     </tr>
