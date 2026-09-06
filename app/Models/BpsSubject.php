@@ -35,7 +35,16 @@ class BpsSubject extends Model
      */
     public function category()
     {
-        return $this->belongsTo(BpsSubjectCategory::class, 'subcat_id', 'subcat_id')
-            ->where('domain_id', $this->domain_id);
+        $instance = $this->newRelatedInstance(BpsSubjectCategory::class);
+
+        return new \App\Relations\CompositeBelongsTo(
+            $instance->newQuery(),
+            $this,
+            'subcat_id',
+            'subcat_id',
+            'domain_id',
+            'domain_id',
+            'category'
+        );
     }
 }
