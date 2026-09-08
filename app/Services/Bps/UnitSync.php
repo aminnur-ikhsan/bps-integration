@@ -45,11 +45,15 @@ class UnitSync
             $body = $this->client->get('list', array_merge($params, ['page' => $page]));
 
             if (($body['data-availability'] ?? null) !== 'available') {
-                return [];
+                break;
             }
 
             $pagination = $body['data'][0] ?? [];
             $items      = $body['data'][1] ?? [];
+
+            if ($items === []) {
+                break;
+            }
 
             foreach ($items as $item) {
                 if (! is_array($item) || ! isset($item['unit_id'], $item['unit'])) {
