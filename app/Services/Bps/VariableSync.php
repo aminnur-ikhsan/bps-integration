@@ -27,7 +27,9 @@ class VariableSync
         $sisaGagal = [];
 
         try {
-            // STEP 1 — pancing halaman pertama, buat tahu jumlah halaman.
+            info('--------------- START SERVICE ---------------');
+
+            // Step 1
             $body1 = $this->collector->fetchFirst('list', $params);
 
             if (($body1['data-availability'] ?? null) !== 'available') {
@@ -45,7 +47,7 @@ class VariableSync
             info('VariableSync step 1', ['last_page' => $lastPage, 'tersimpan' => $tersimpan]);
 
             if ($lastPage > 1) {
-                // STEP 2 — jaring halaman 2 sampai terakhir, sekaligus.
+                // Step 2
                 $net = $this->collector->fetchWithNet('list', $params, range(2, $lastPage));
 
                 $rows = $this->extractRows($net['bodies']);
@@ -59,7 +61,7 @@ class VariableSync
                     'gagal' => array_keys($sisaGagal),
                 ]);
 
-                // STEP 3 — pancing ulang halaman yang gagal, satu per satu.
+                // Step 3
                 if ($sisaGagal !== []) {
                     $rod = $this->collector->fetchOneByOne('list', $params, array_keys($sisaGagal));
 
@@ -81,7 +83,7 @@ class VariableSync
             throw $e;
         }
 
-        // STEP 4 — laporkan halaman yang masih gagal (di luar try supaya log tidak dobel).
+        // Step 4
         $this->log($params, $sisaGagal === [] ? 'success' : 'partial', $tersimpan, $startedAt, $userId);
 
         if ($sisaGagal !== []) {
@@ -93,8 +95,7 @@ class VariableSync
         return new SyncResult($tersimpan, $syncedAt);
     }
 
-    // Ambil baris item dari kumpulan body BPS + pastikan bentuknya benar.
-    // Dipakai di ketiga langkah pengambilan.
+    // Ambil item dari body + validasi.
     private function extractRows(array $bodies): array
     {
         $rows = [];

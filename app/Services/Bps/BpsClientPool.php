@@ -6,8 +6,7 @@ use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
-// "Jaring" — ambil banyak halaman BPS sekaligus (paralel).
-// Tidak pernah melempar: halaman yang gagal dikembalikan di 'failedPages'.
+// Ambil banyak halaman BPS secara paralel. Tidak melempar.
 class BpsClientPool
 {
     public function __construct(
@@ -15,14 +14,8 @@ class BpsClientPool
         private string $key,
     ) {}
 
-    // Berapa request berangkat bersamaan dalam satu gelombang.
     private int $concurrency = 5;
 
-    // Ambil beberapa halaman. $pages contoh: [2, 3, 4, 5].
-    // Kembalian: [
-    //   'bodies'      => [nomorHalaman => body JSON],
-    //   'failedPages' => [nomorHalaman => alasan],
-    // ]
     public function fetchPages(string $path, array $query, array $pages): array
     {
         $bodies = [];
@@ -44,7 +37,6 @@ class BpsClientPool
             foreach ($grup as $page) {
                 $response = $responses[(string) $page];
 
-                // Kalau bukan Response, isinya objek exception = koneksi gagal.
                 if (! $response instanceof Response) {
                     $failedPages[$page] = 'koneksi gagal';
 
@@ -59,7 +51,6 @@ class BpsClientPool
 
                 $body = $response->json();
 
-                // BPS bisa balas HTTP 200 walau permintaan ditolak.
                 if (! is_array($body) || ($body['status'] ?? null) !== 'OK') {
                     $failedPages[$page] = $body['message'] ?? 'body tidak dikenali';
 
