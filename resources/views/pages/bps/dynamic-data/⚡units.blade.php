@@ -13,8 +13,22 @@ new #[Title('Units')] class extends Component {
     use WithPagination;
 
     public string $domainId = '3200';
+    public string $search = '';
     public string $message = '';
     public bool $isError = false;
+
+    public function updatedDomainId(): void
+    {
+        $this->resetPage();
+        $this->search = '';
+        $this->message = '';
+        $this->isError = false;
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
 
     public function fetch(): void
     {
@@ -34,68 +48,84 @@ new #[Title('Units')] class extends Component {
 
     public function with(): array
     {
+        $query = BpsUnit::where('domain_id', $this->domainId);
+
+        if ($this->search !== '') {
+            $term = $this->search;
+            $query->where(function ($q) use ($term) {
+                $q->where('unit', 'ilike', "%{$term}%");
+                if (ctype_digit($term)) {
+                    $q->orWhere('unit_id', (int) $term);
+                }
+            });
+        }
+
         return [
-            'domains' => BpsDomain::orderBy('domain_name')->get(),
-            'units'   => BpsUnit::where('domain_id', $this->domainId)
-                ->orderBy('unit_id')
-                ->paginate(20),
+            'domains' => BpsDomain::orderBy('domain_id')->get(),
+            'units'   => $query->orderBy('unit_id')->paginate(20),
         ];
     }
 }; ?>
 
-<div>
+<div class="flex h-full w-full flex-1 flex-col gap-6">
+    <div class="flex items-center justify-between gap-4">
         <flux:heading size="xl">Units</flux:heading>
-        <flux:subheading>Daftar satuan (unit) dari BPS.</flux:subheading>
 
-        <div class="mt-6 flex flex-wrap items-end gap-4">
-            <flux:select wire:model.live="domainId" label="Domain" class="w-64">
+        <flux:button wire:click="fetch" wire:loading.attr="disabled" variant="primary" icon="arrow-down-tray">
+            <span wire:loading.remove wire:target="fetch">Fetch Data</span>
+            <span wire:loading wire:target="fetch">Mengambil...</span>
+        </flux:button>
+    </div>
+
+    @if ($message)
+        <flux:callout :variant="$isError ? 'danger' : 'success'">
+            <flux:callout.text>{{ $message }}</flux:callout.text>
+        </flux:callout>
+    @endif
+
+    <div class="flex items-center gap-4">
+        <div class="w-64">
+            <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
                 @foreach ($domains as $domain)
                     <flux:select.option value="{{ $domain->domain_id }}">
                         {{ $domain->domain_id }} — {{ $domain->domain_name }}
                     </flux:select.option>
                 @endforeach
             </flux:select>
-
-            <flux:button wire:click="fetch" wire:loading.attr="disabled" variant="primary">
-                <span wire:loading.remove wire:target="fetch">Fetch Data</span>
-                <span wire:loading wire:target="fetch">Mengambil...</span>
-            </flux:button>
         </div>
+        <div class="flex-1">
+            <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID atau nama satuan')" icon="magnifying-glass" />
+        </div>
+    </div>
 
-        @if ($message)
-            <flux:callout class="mt-4" :variant="$isError ? 'danger' : 'success'" :dismissible="true">
-                {{ $message }}
-            </flux:callout>
-        @endif
-
-        <div class="mt-6 overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b text-left">
-                        <th class="py-2 pr-4">Unit ID</th>
-                        <th class="py-2 pr-4">Nama Unit</th>
-                        <th class="py-2">Terakhir Disinkron</th>
+    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
+        <table class="w-full text-left text-sm">
+            <thead class="border-b border-neutral-200 dark:border-neutral-700">
+                <tr>
+                    <th class="px-4 py-3 font-medium">No.</th>
+                    <th class="px-4 py-3 font-medium">Unit ID</th>
+                    <th class="px-4 py-3 font-medium">Nama Unit</th>
+                    <th class="px-4 py-3 font-medium">Sync terakhir</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($units as $unit)
+                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
+                        <td class="px-4 py-3 text-neutral-500">{{ $units->firstItem() + $loop->index }}</td>
+                        <td class="px-4 py-3">{{ $unit->unit_id }}</td>
+                        <td class="px-4 py-3">{{ $unit->unit }}</td>
+                        <td class="px-4 py-3">{{ $unit->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @forelse ($units as $unit)
-                        <tr class="border-b hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                            <td class="py-2 pr-4 font-mono">{{ $unit->unit_id }}</td>
-                            <td class="py-2 pr-4">{{ $unit->unit }}</td>
-                            <td class="py-2 text-zinc-500">{{ $unit->last_synced_at?->diffForHumans() }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="py-6 text-center text-zinc-500">
-                                Belum ada data.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                @empty
+                    <tr>
+                        <td colspan="4" class="px-4 py-6 text-center">
+                            Belum ada data.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-        <div class="mt-4">
-            {{ $units->links() }}
-        </div>
+    {{ $units->links() }}
 </div>
