@@ -16,12 +16,12 @@ class VerticalVariableSync
     {
         set_time_limit(300); // Prevent PHP timeout for sequential API fetches
         $startedAt = microtime(true);
-        $params = array_filter([
+        $params = [
             'model' => 'vervar',
             'domain' => $domainId,
             'lang' => 'ind',
             'var' => $varId,
-        ], fn ($v) => $v !== null);
+        ];
 
         try {
             $rows = $this->fetchAllPages($params);
