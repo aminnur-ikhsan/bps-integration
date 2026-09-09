@@ -106,23 +106,16 @@ new #[Title('Derived Variables')] class extends Component {
 
     <div class="flex items-center gap-4">
         <div class="w-64">
-            <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
-                @foreach ($domains as $domain)
-                    <flux:select.option value="{{ $domain->domain_id }}">
-                        {{ $domain->domain_id }} — {{ $domain->domain_name }}
-                    </flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="domainId"
+                :options="$domains->pluck('label', 'domain_id')"
+                placeholder="Pilih Wilayah..." />
         </div>
         <div class="w-64">
-            <flux:select wire:model.live="varId" placeholder="Semua Variabel">
-                <flux:select.option value="">-- Semua Variabel --</flux:select.option>
-                @foreach ($variables as $v)
-                    <flux:select.option value="{{ $v->var_id }}">
-                        {{ $v->var_id }} — {{ $v->title }}
-                    </flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="varId"
+                :options="$variables->pluck('label', 'var_id')"
+                null-label="-- Semua Variabel --" />
         </div>
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID, nama, atau grup')" icon="magnifying-glass" />
