@@ -12,7 +12,7 @@ class VerticalVariableSync
 {
     public function __construct(private BpsClient $client) {}
 
-    public function sync(string $domainId, ?int $varId = null, ?int $userId = null): SyncResult
+    public function sync(string $domainId, int $varId, ?int $userId = null): SyncResult
     {
         set_time_limit(300); // Prevent PHP timeout for sequential API fetches
         $startedAt = microtime(true);
@@ -71,7 +71,7 @@ class VerticalVariableSync
         return $rows;
     }
 
-    private function store(array $rows, string $domainId, ?int $varId, CarbonInterface $syncedAt): void
+    private function store(array $rows, string $domainId, int $varId, CarbonInterface $syncedAt): void
     {
         if ($rows === []) {
             return;
@@ -96,8 +96,8 @@ class VerticalVariableSync
 
         BpsVerticalVariable::upsert(
             $records,
-            ['domain_id', 'vervar_id', 'item_ver_id'],
-            ['var_id', 'vervar', 'group_ver_id', 'name_group_ver_id', 'last_synced_at', 'updated_at'],
+            ['domain_id', 'var_id', 'vervar_id', 'item_ver_id'],
+            ['vervar', 'group_ver_id', 'name_group_ver_id', 'last_synced_at', 'updated_at'],
         );
     }
 

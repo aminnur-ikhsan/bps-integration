@@ -55,9 +55,15 @@ new #[Title('Vertical Variables')] class extends Component {
         $this->message = '';
         $this->isError = false;
 
+        if (! $this->varId) {
+            $this->isError = true;
+            $this->message = 'Pilih variabel dulu sebelum mengambil data.';
+
+            return;
+        }
+
         try {
-            $parsedVarId = $this->varId ? (int) $this->varId : null;
-            $result = app(VerticalVariableSync::class)->sync($this->domainId, $parsedVarId, auth()->id());
+            $result = app(VerticalVariableSync::class)->sync($this->domainId, (int) $this->varId, auth()->id());
             $this->message = "Berhasil menyimpan {$result->count} vertical variable untuk domain {$this->domainId}.";
         } catch (BpsApiException $e) {
             $this->isError = true;
