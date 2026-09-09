@@ -63,6 +63,11 @@ new #[Title('Units')] class extends Component {
         return [
             'domains' => BpsDomain::orderBy('domain_id')->get(),
             'units'   => $query->orderBy('unit_id')->paginate(20),
+            'columns' => [
+                ['label' => 'Unit ID', 'field' => 'unit_id'],
+                ['label' => 'Nama Unit', 'field' => 'unit'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
         ];
     }
 }; ?>
@@ -98,34 +103,5 @@ new #[Title('Units')] class extends Component {
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">No.</th>
-                    <th class="px-4 py-3 font-medium">Unit ID</th>
-                    <th class="px-4 py-3 font-medium">Nama Unit</th>
-                    <th class="px-4 py-3 font-medium">Sync terakhir</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($units as $unit)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $units->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $unit->unit_id }}</td>
-                        <td class="px-4 py-3">{{ $unit->unit }}</td>
-                        <td class="px-4 py-3">{{ $unit->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center">
-                            Belum ada data.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $units->links() }}
+    <x-data-table :rows="$units" :columns="$columns" empty="Belum ada data." />
 </div>
