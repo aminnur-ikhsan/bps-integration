@@ -1,4 +1,5 @@
 <?php
+
 // app/Models/BpsVariable.php
 
 namespace App\Models;

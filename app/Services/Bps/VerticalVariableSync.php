@@ -1,4 +1,5 @@
 <?php
+
 // app/Services/Bps/VerticalVariableSync.php
 
 namespace App\Services\Bps;
@@ -16,11 +17,11 @@ class VerticalVariableSync
         set_time_limit(300); // Prevent PHP timeout for sequential API fetches
         $startedAt = microtime(true);
         $params = array_filter([
-            'model'  => 'vervar',
+            'model' => 'vervar',
             'domain' => $domainId,
-            'lang'   => 'ind',
-            'var'    => $varId,
-        ], fn($v) => $v !== null);
+            'lang' => 'ind',
+            'var' => $varId,
+        ], fn ($v) => $v !== null);
 
         try {
             $rows = $this->fetchAllPages($params);
@@ -50,7 +51,7 @@ class VerticalVariableSync
             }
 
             $pagination = $body['data'][0] ?? [];
-            $items      = $body['data'][1] ?? [];
+            $items = $body['data'][1] ?? [];
 
             if ($items === []) {
                 break;
@@ -62,7 +63,7 @@ class VerticalVariableSync
                 }
             }
 
-            $rows     = array_merge($rows, $items);
+            $rows = array_merge($rows, $items);
             $lastPage = (int) ($pagination['pages'] ?? 1);
             $page++;
         } while ($page <= $lastPage);
@@ -80,16 +81,16 @@ class VerticalVariableSync
 
         foreach ($rows as $row) {
             $records[] = [
-                'domain_id'         => $domainId,
-                'var_id'            => $varId,
-                'vervar_id'         => $row['kode_ver_id'],
-                'vervar'            => $row['vervar'],
-                'item_ver_id'       => $row['item_ver_id'] ?? null,
-                'group_ver_id'      => $row['group_ver_id'] ?? null,
+                'domain_id' => $domainId,
+                'var_id' => $varId,
+                'vervar_id' => $row['kode_ver_id'],
+                'vervar' => $row['vervar'],
+                'item_ver_id' => $row['item_ver_id'] ?? null,
+                'group_ver_id' => $row['group_ver_id'] ?? null,
                 'name_group_ver_id' => $row['name_group_ver_id'] ?? null,
-                'last_synced_at'    => $syncedAt,
-                'created_at'        => $syncedAt,
-                'updated_at'        => $syncedAt,
+                'last_synced_at' => $syncedAt,
+                'created_at' => $syncedAt,
+                'updated_at' => $syncedAt,
             ];
         }
 
@@ -103,15 +104,15 @@ class VerticalVariableSync
     private function log(array $params, string $status, ?int $count, float $startedAt, ?int $userId, ?BpsApiException $error = null): void
     {
         BpsFetchLog::create([
-            'user_id'       => $userId,
-            'endpoint'      => 'list',
-            'params'        => $params,
-            'status'        => $status,
-            'http_status'   => $error?->httpStatus,
+            'user_id' => $userId,
+            'endpoint' => 'list',
+            'params' => $params,
+            'status' => $status,
+            'http_status' => $error?->httpStatus,
             'records_count' => $count,
-            'duration_ms'   => (int) round((microtime(true) - $startedAt) * 1000),
-            'error'         => $error ? ($error->cause ?? $error->getMessage()) : null,
-            'created_at'    => now(),
+            'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            'error' => $error ? ($error->cause ?? $error->getMessage()) : null,
+            'created_at' => now(),
         ]);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 // app/Models/BpsUnit.php
 
 namespace App\Models;

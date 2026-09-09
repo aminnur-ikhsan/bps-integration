@@ -1,4 +1,5 @@
 <?php
+
 // database/migrations/2026_09_06_130204_create_bps_periods_table.php
 
 use Illuminate\Database\Migrations\Migration;

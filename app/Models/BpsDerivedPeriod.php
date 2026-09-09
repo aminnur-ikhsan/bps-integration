@@ -1,4 +1,5 @@
 <?php
+
 // app/Models/BpsDerivedPeriod.php
 
 namespace App\Models;

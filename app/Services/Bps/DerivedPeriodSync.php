@@ -1,4 +1,5 @@
 <?php
+
 // app/Services/Bps/DerivedPeriodSync.php
 
 namespace App\Services\Bps;
@@ -16,11 +17,11 @@ class DerivedPeriodSync
         set_time_limit(300);
         $startedAt = microtime(true);
         $params = array_filter([
-            'model'  => 'turth',
+            'model' => 'turth',
             'domain' => $domainId,
-            'lang'   => 'ind',
-            'var'    => $varId,
-        ], fn($v) => $v !== null);
+            'lang' => 'ind',
+            'var' => $varId,
+        ], fn ($v) => $v !== null);
 
         try {
             $rows = $this->fetchAllPages($params);
@@ -50,7 +51,7 @@ class DerivedPeriodSync
             }
 
             $pagination = $body['data'][0] ?? [];
-            $items      = $body['data'][1] ?? [];
+            $items = $body['data'][1] ?? [];
 
             if ($items === []) {
                 break;
@@ -62,7 +63,7 @@ class DerivedPeriodSync
                 }
             }
 
-            $rows     = array_merge($rows, $items);
+            $rows = array_merge($rows, $items);
             $lastPage = (int) ($pagination['pages'] ?? 1);
             $page++;
         } while ($page <= $lastPage);
@@ -80,15 +81,15 @@ class DerivedPeriodSync
 
         foreach ($rows as $row) {
             $records[] = [
-                'domain_id'        => $domainId,
-                'var_id'           => $varId,
-                'turth_id'         => $row['turth_id'],
-                'turth'            => $row['turth'],
-                'group_turth_id'   => $row['group_turth_id'] ?? null,
+                'domain_id' => $domainId,
+                'var_id' => $varId,
+                'turth_id' => $row['turth_id'],
+                'turth' => $row['turth'],
+                'group_turth_id' => $row['group_turth_id'] ?? null,
                 'name_group_turth' => $row['name_group_turth'] ?? null,
-                'last_synced_at'   => $syncedAt,
-                'created_at'       => $syncedAt,
-                'updated_at'       => $syncedAt,
+                'last_synced_at' => $syncedAt,
+                'created_at' => $syncedAt,
+                'updated_at' => $syncedAt,
             ];
         }
 
@@ -102,15 +103,15 @@ class DerivedPeriodSync
     private function log(array $params, string $status, ?int $count, float $startedAt, ?int $userId, ?BpsApiException $error = null): void
     {
         BpsFetchLog::create([
-            'user_id'       => $userId,
-            'endpoint'      => 'list',
-            'params'        => $params,
-            'status'        => $status,
-            'http_status'   => $error?->httpStatus,
+            'user_id' => $userId,
+            'endpoint' => 'list',
+            'params' => $params,
+            'status' => $status,
+            'http_status' => $error?->httpStatus,
             'records_count' => $count,
-            'duration_ms'   => (int) round((microtime(true) - $startedAt) * 1000),
-            'error'         => $error ? ($error->cause ?? $error->getMessage()) : null,
-            'created_at'    => now(),
+            'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            'error' => $error ? ($error->cause ?? $error->getMessage()) : null,
+            'created_at' => now(),
         ]);
     }
 }

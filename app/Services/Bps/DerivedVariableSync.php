@@ -1,4 +1,5 @@
 <?php
+
 // app/Services/Bps/DerivedVariableSync.php
 
 namespace App\Services\Bps;
@@ -15,10 +16,10 @@ class DerivedVariableSync
     {
         $startedAt = microtime(true);
         $params = array_filter([
-            'model'  => 'turvar',
+            'model' => 'turvar',
             'domain' => $domainId,
-            'lang'   => 'ind',
-            'var'    => $varId,
+            'lang' => 'ind',
+            'var' => $varId,
             'nopage' => 1,
         ], fn ($v) => $v !== null);
 
@@ -28,6 +29,7 @@ class DerivedVariableSync
 
             if (($body['data-availability'] ?? null) !== 'available') {
                 $this->log($params, 'success', 0, $startedAt, $userId);
+
                 return new SyncResult(0, $syncedAt);
             }
 
@@ -59,15 +61,15 @@ class DerivedVariableSync
 
         foreach ($rows as $row) {
             $records[] = [
-                'domain_id'          => $domainId,
-                'var_id'             => $varId,
-                'turvar_id'          => $row['turvar_id'],
-                'turvar'             => $row['turvar'],
-                'group_turvar_id'    => $row['group_turvar_id'] ?? null,
-                'name_group_turvar'  => $row['name_group_turvar'] ?? null,
-                'last_synced_at'     => $syncedAt,
-                'created_at'         => $syncedAt,
-                'updated_at'         => $syncedAt,
+                'domain_id' => $domainId,
+                'var_id' => $varId,
+                'turvar_id' => $row['turvar_id'],
+                'turvar' => $row['turvar'],
+                'group_turvar_id' => $row['group_turvar_id'] ?? null,
+                'name_group_turvar' => $row['name_group_turvar'] ?? null,
+                'last_synced_at' => $syncedAt,
+                'created_at' => $syncedAt,
+                'updated_at' => $syncedAt,
             ];
         }
 
@@ -81,15 +83,15 @@ class DerivedVariableSync
     private function log(array $params, string $status, ?int $count, float $startedAt, ?int $userId, ?BpsApiException $error = null): void
     {
         BpsFetchLog::create([
-            'user_id'       => $userId,
-            'endpoint'      => 'list',
-            'params'        => $params,
-            'status'        => $status,
-            'http_status'   => $error?->httpStatus,
+            'user_id' => $userId,
+            'endpoint' => 'list',
+            'params' => $params,
+            'status' => $status,
+            'http_status' => $error?->httpStatus,
             'records_count' => $count,
-            'duration_ms'   => (int) round((microtime(true) - $startedAt) * 1000),
-            'error'         => $error ? ($error->cause ?? $error->getMessage()) : null,
-            'created_at'    => now(),
+            'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            'error' => $error ? ($error->cause ?? $error->getMessage()) : null,
+            'created_at' => now(),
         ]);
     }
 }
