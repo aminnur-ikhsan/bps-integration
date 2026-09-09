@@ -92,10 +92,7 @@ new #[Title('Vertical Variables')] class extends Component {
     <div class="flex items-center justify-between gap-4">
         <flux:heading size="xl">Vertical Variables</flux:heading>
 
-        <flux:button wire:click="fetch" wire:loading.attr="disabled" variant="primary" icon="arrow-down-tray">
-            <span wire:loading.remove wire:target="fetch">Fetch Data</span>
-            <span wire:loading wire:target="fetch">Mengambil...</span>
-        </flux:button>
+        {{-- Tombol Fetch Data disembunyikan sementara: sinkronisasi vertical variable belum siap. --}}
     </div>
 
     @if ($message)
