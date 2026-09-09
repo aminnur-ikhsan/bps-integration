@@ -19,10 +19,22 @@ new #[Title('Vertical Variables')] class extends Component {
     public string $message = '';
     public bool $isError = false;
 
+    public function mount(): void
+    {
+        $this->varId = $this->firstVariableId();
+    }
+
+    private function firstVariableId(): ?string
+    {
+        $id = BpsVariable::where('domain_id', $this->domainId)->orderBy('title')->value('var_id');
+
+        return $id === null ? null : (string) $id;
+    }
+
     public function updatedDomainId(): void
     {
         $this->resetPage();
-        $this->varId = null;
+        $this->varId = $this->firstVariableId();
         $this->search = '';
         $this->message = '';
         $this->isError = false;
@@ -92,7 +104,10 @@ new #[Title('Vertical Variables')] class extends Component {
     <div class="flex items-center justify-between gap-4">
         <flux:heading size="xl">Vertical Variables</flux:heading>
 
-        {{-- Tombol Fetch Data disembunyikan sementara: sinkronisasi vertical variable belum siap. --}}
+        <flux:button wire:click="fetch" wire:loading.attr="disabled" variant="primary" icon="arrow-down-tray">
+            <span wire:loading.remove wire:target="fetch">Fetch Data</span>
+            <span wire:loading wire:target="fetch">Mengambil...</span>
+        </flux:button>
     </div>
 
     @if ($message)
@@ -112,7 +127,7 @@ new #[Title('Vertical Variables')] class extends Component {
             <x-searchable-select
                 wire:model.live="varId"
                 :options="$variables->pluck('label', 'var_id')"
-                null-label="-- Semua Variabel --" />
+                placeholder="Pilih Variabel..." />
         </div>
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID, nama, atau grup')" icon="magnifying-glass" />
