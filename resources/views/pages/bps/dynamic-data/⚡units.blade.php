@@ -90,13 +90,10 @@ new #[Title('Units')] class extends Component {
 
     <div class="flex items-center gap-4">
         <div class="w-64">
-            <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
-                @foreach ($domains as $domain)
-                    <flux:select.option value="{{ $domain->domain_id }}">
-                        {{ $domain->domain_id }} — {{ $domain->domain_name }}
-                    </flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="domainId"
+                :options="$domains->pluck('label', 'domain_id')"
+                placeholder="Pilih Wilayah..." />
         </div>
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID atau nama satuan')" icon="magnifying-glass" />

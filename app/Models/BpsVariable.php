@@ -36,4 +36,9 @@ class BpsVariable extends Model
     {
         return $this->belongsTo(BpsDomain::class, 'domain_id', 'domain_id');
     }
+
+    public function getLabelAttribute(): string
+    {
+        return "{$this->var_id} — {$this->title}";
+    }
 }
