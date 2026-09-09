@@ -121,19 +121,16 @@ new #[Title('Subjek BPS')] class extends Component {
 
     <div class="flex items-center gap-4">
         <div class="w-64">
-            <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
-                @foreach ($this->domains as $domain)
-                    <flux:select.option value="{{ $domain->domain_id }}">{{ $domain->domain_name }} ({{ $domain->domain_id }})</flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="domainId"
+                :options="$this->domains->pluck('label', 'domain_id')"
+                placeholder="Pilih Wilayah..." />
         </div>
         <div class="w-64">
-            <flux:select wire:model.live="subcatId" placeholder="Semua Kategori">
-                <flux:select.option value="">Semua Kategori</flux:select.option>
-                @foreach ($this->categories as $category)
-                    <flux:select.option value="{{ $category->subcat_id }}">{{ $category->title }}</flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="subcatId"
+                :options="$this->categories->pluck('title', 'subcat_id')"
+                null-label="Semua Kategori" />
         </div>
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID atau judul subjek')" icon="magnifying-glass" />
