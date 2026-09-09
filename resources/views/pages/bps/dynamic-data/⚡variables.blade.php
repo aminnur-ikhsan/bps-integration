@@ -64,6 +64,13 @@ new #[Title('Variables')] class extends Component {
         return [
             'domains'   => BpsDomain::orderBy('domain_id')->get(),
             'variables' => $query->orderBy('title')->paginate(20),
+            'columns'   => [
+                ['label' => 'Var ID', 'field' => 'var_id'],
+                ['label' => 'Judul', 'field' => 'title'],
+                ['label' => 'Subjek', 'field' => 'sub_name'],
+                ['label' => 'Satuan', 'field' => 'unit'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
         ];
     }
 }; ?>
@@ -99,38 +106,5 @@ new #[Title('Variables')] class extends Component {
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">No.</th>
-                    <th class="px-4 py-3 font-medium">Var ID</th>
-                    <th class="px-4 py-3 font-medium">Judul</th>
-                    <th class="px-4 py-3 font-medium">Subjek</th>
-                    <th class="px-4 py-3 font-medium">Satuan</th>
-                    <th class="px-4 py-3 font-medium">Sync terakhir</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($variables as $var)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $variables->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $var->var_id }}</td>
-                        <td class="px-4 py-3">{{ $var->title }}</td>
-                        <td class="px-4 py-3">{{ $var->sub_name }}</td>
-                        <td class="px-4 py-3">{{ $var->unit }}</td>
-                        <td class="px-4 py-3">{{ $var->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center">
-                            Belum ada data. Pilih domain dan tekan Fetch Data.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $variables->links() }}
+    <x-data-table :rows="$variables" :columns="$columns" empty="Belum ada data. Pilih domain dan tekan Fetch Data." />
 </div>

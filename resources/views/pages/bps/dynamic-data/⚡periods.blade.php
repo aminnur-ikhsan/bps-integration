@@ -77,6 +77,11 @@ new #[Title('Periods')] class extends Component {
             'domains'   => BpsDomain::orderBy('domain_id')->get(),
             'variables' => BpsVariable::where('domain_id', $this->domainId)->orderBy('title')->get(),
             'periods'   => $query->orderBy('th_id')->paginate(20),
+            'columns'   => [
+                ['label' => 'Th ID', 'field' => 'th_id'],
+                ['label' => 'Tahun (Label)', 'field' => 'th'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
         ];
     }
 }; ?>
@@ -122,34 +127,5 @@ new #[Title('Periods')] class extends Component {
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">No.</th>
-                    <th class="px-4 py-3 font-medium">Th ID</th>
-                    <th class="px-4 py-3 font-medium">Tahun (Label)</th>
-                    <th class="px-4 py-3 font-medium">Sync terakhir</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($periods as $period)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $periods->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $period->th_id }}</td>
-                        <td class="px-4 py-3">{{ $period->th }}</td>
-                        <td class="px-4 py-3">{{ $period->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center">
-                            Belum ada data.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $periods->links() }}
+    <x-data-table :rows="$periods" :columns="$columns" empty="Belum ada data." />
 </div>

@@ -78,6 +78,12 @@ new #[Title('Derived Variables')] class extends Component {
             'domains'   => BpsDomain::orderBy('domain_id')->get(),
             'variables' => BpsVariable::where('domain_id', $this->domainId)->orderBy('title')->get(),
             'turvars'   => $query->orderBy('turvar_id')->paginate(20),
+            'columns'   => [
+                ['label' => 'Turvar ID', 'field' => 'turvar_id'],
+                ['label' => 'Nama Turvar', 'field' => 'turvar'],
+                ['label' => 'Grup', 'field' => 'name_group_turvar'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
         ];
     }
 }; ?>
@@ -123,36 +129,5 @@ new #[Title('Derived Variables')] class extends Component {
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">No.</th>
-                    <th class="px-4 py-3 font-medium">Turvar ID</th>
-                    <th class="px-4 py-3 font-medium">Nama Turvar</th>
-                    <th class="px-4 py-3 font-medium">Grup</th>
-                    <th class="px-4 py-3 font-medium">Sync terakhir</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($turvars as $turvar)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $turvars->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $turvar->turvar_id }}</td>
-                        <td class="px-4 py-3">{{ $turvar->turvar }}</td>
-                        <td class="px-4 py-3">{{ $turvar->name_group_turvar }}</td>
-                        <td class="px-4 py-3">{{ $turvar->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center">
-                            Belum ada data.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $turvars->links() }}
+    <x-data-table :rows="$turvars" :columns="$columns" empty="Belum ada data." />
 </div>

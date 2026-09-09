@@ -78,6 +78,12 @@ new #[Title('Derived Periods')] class extends Component {
             'domains'   => BpsDomain::orderBy('domain_id')->get(),
             'variables' => BpsVariable::where('domain_id', $this->domainId)->orderBy('title')->get(),
             'turths'    => $query->orderBy('turth_id')->paginate(20),
+            'columns'   => [
+                ['label' => 'Turth ID', 'field' => 'turth_id'],
+                ['label' => 'Nama Turth', 'field' => 'turth'],
+                ['label' => 'Grup', 'field' => 'name_group_turth'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
         ];
     }
 }; ?>
@@ -123,36 +129,5 @@ new #[Title('Derived Periods')] class extends Component {
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">No.</th>
-                    <th class="px-4 py-3 font-medium">Turth ID</th>
-                    <th class="px-4 py-3 font-medium">Nama Turth</th>
-                    <th class="px-4 py-3 font-medium">Grup</th>
-                    <th class="px-4 py-3 font-medium">Sync terakhir</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($turths as $turth)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $turths->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $turth->turth_id }}</td>
-                        <td class="px-4 py-3">{{ $turth->turth }}</td>
-                        <td class="px-4 py-3">{{ $turth->name_group_turth }}</td>
-                        <td class="px-4 py-3">{{ $turth->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center">
-                            Belum ada data.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $turths->links() }}
+    <x-data-table :rows="$turths" :columns="$columns" empty="Belum ada data." />
 </div>
