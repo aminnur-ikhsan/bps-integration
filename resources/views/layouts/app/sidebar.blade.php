@@ -15,7 +15,9 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                </flux:sidebar.group>
 
+                <flux:sidebar.group :heading="__('BPS')" class="grid">
                     <flux:sidebar.item icon="table-cells" :href="route('bps.domains')" :current="request()->routeIs('bps.domains')" wire:navigate>
                         {{ __('Domain BPS') }}
                     </flux:sidebar.item>
@@ -26,6 +28,32 @@
 
                     <flux:sidebar.item icon="document-text" :href="route('bps.subjects')" :current="request()->routeIs('bps.subjects')" wire:navigate>
                         {{ __('Subjek BPS') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
+                <flux:sidebar.group :heading="__('Dynamic Data')" class="grid">
+                    <flux:sidebar.item icon="variable" :href="route('bps.dynamic-data.variables')" :current="request()->routeIs('bps.dynamic-data.variables')" wire:navigate>
+                        {{ __('Variables') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="arrows-pointing-out" :href="route('bps.dynamic-data.vertical-variables')" :current="request()->routeIs('bps.dynamic-data.vertical-variables')" wire:navigate>
+                        {{ __('Vertical Variables') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="arrow-trending-down" :href="route('bps.dynamic-data.derived-variables')" :current="request()->routeIs('bps.dynamic-data.derived-variables')" wire:navigate>
+                        {{ __('Derived Variables') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="calendar-days" :href="route('bps.dynamic-data.periods')" :current="request()->routeIs('bps.dynamic-data.periods')" wire:navigate>
+                        {{ __('Periods') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="clock" :href="route('bps.dynamic-data.derived-periods')" :current="request()->routeIs('bps.dynamic-data.derived-periods')" wire:navigate>
+                        {{ __('Derived Periods') }}
+                    </flux:sidebar.item>
+
+                    <flux:sidebar.item icon="scale" :href="route('bps.dynamic-data.units')" :current="request()->routeIs('bps.dynamic-data.units')" wire:navigate>
+                        {{ __('Units') }}
                     </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>

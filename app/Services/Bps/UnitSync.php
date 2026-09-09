@@ -1,21 +1,23 @@
 <?php
 
+// app/Services/Bps/UnitSync.php
+
 namespace App\Services\Bps;
 
 use App\Models\BpsFetchLog;
-use App\Models\BpsSubject;
+use App\Models\BpsUnit;
 use Carbon\CarbonInterface;
 
-class SubjectSync
+class UnitSync
 {
     public function __construct(private BpsClient $client) {}
 
     public function sync(string $domainId, ?int $userId = null): SyncResult
     {
-        set_time_limit(300); // Prevent PHP timeout for sequential API fetches
+        set_time_limit(300);
         $startedAt = microtime(true);
         $params = [
-            'model' => 'subject',
+            'model' => 'unit',
             'domain' => $domainId,
             'lang' => 'ind',
         ];
@@ -25,13 +27,11 @@ class SubjectSync
             $syncedAt = now();
 
             $this->store($rows, $domainId, $syncedAt);
-
             $this->log($params, 'success', count($rows), $startedAt, $userId);
 
             return new SyncResult(count($rows), $syncedAt);
         } catch (BpsApiException $e) {
             $this->log($params, 'failed', null, $startedAt, $userId, $e);
-
             throw $e;
         }
     }
@@ -43,8 +43,7 @@ class SubjectSync
         $lastPage = 1;
 
         do {
-            $currentParams = array_merge($params, ['page' => $page]);
-            $body = $this->client->get('list', $currentParams);
+            $body = $this->client->get('list', array_merge($params, ['page' => $page]));
 
             if (($body['data-availability'] ?? null) !== 'available') {
                 break;
@@ -58,8 +57,8 @@ class SubjectSync
             }
 
             foreach ($items as $item) {
-                if (! is_array($item) || ! isset($item['sub_id'], $item['title'])) {
-                    throw new BpsApiException('Bentuk data subject dari BPS tidak dikenali.');
+                if (! is_array($item) || ! isset($item['unit_id'], $item['unit'])) {
+                    throw new BpsApiException('Bentuk data unit dari BPS tidak dikenali.');
                 }
             }
 
@@ -82,47 +81,32 @@ class SubjectSync
         foreach ($rows as $row) {
             $records[] = [
                 'domain_id' => $domainId,
-                'sub_id' => $row['sub_id'],
-                'subcat_id' => $row['subcat_id'] ?? null,
-                'title' => $row['title'],
+                'unit_id' => $row['unit_id'],
+                'unit' => $row['unit'],
                 'last_synced_at' => $syncedAt,
                 'created_at' => $syncedAt,
                 'updated_at' => $syncedAt,
             ];
         }
 
-        BpsSubject::upsert(
+        BpsUnit::upsert(
             $records,
-            ['domain_id', 'sub_id'],
-            ['subcat_id', 'title', 'last_synced_at', 'updated_at'],
+            ['domain_id', 'unit_id'],
+            ['unit', 'last_synced_at', 'updated_at'],
         );
     }
 
-    private function log(
-        array $params,
-        string $status,
-        ?int $count,
-        float $startedAt,
-        ?int $userId,
-        ?BpsApiException $error = null,
-    ): void {
-        $httpStatus = null;
-        $errorMessage = null;
-
-        if ($error !== null) {
-            $httpStatus = $error->httpStatus;
-            $errorMessage = $error->cause ?? $error->getMessage();
-        }
-
+    private function log(array $params, string $status, ?int $count, float $startedAt, ?int $userId, ?BpsApiException $error = null): void
+    {
         BpsFetchLog::create([
             'user_id' => $userId,
             'endpoint' => 'list',
             'params' => $params,
             'status' => $status,
-            'http_status' => $httpStatus,
+            'http_status' => $error?->httpStatus,
             'records_count' => $count,
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'error' => $errorMessage,
+            'error' => $error ? ($error->cause ?? $error->getMessage()) : null,
             'created_at' => now(),
         ]);
     }

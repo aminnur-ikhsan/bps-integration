@@ -89,6 +89,18 @@ new #[Title('Subjek BPS')] class extends Component {
 
         return $query->orderBy('sub_id')->paginate(25);
     }
+
+    public function with(): array
+    {
+        return [
+            'columns' => [
+                ['label' => 'ID Subjek', 'field' => 'sub_id'],
+                ['label' => 'Judul', 'field' => 'title'],
+                ['label' => 'Kategori', 'field' => 'category.title'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
+        ];
+    }
 }; ?>
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -109,61 +121,21 @@ new #[Title('Subjek BPS')] class extends Component {
 
     <div class="flex items-center gap-4">
         <div class="w-64">
-            <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
-                @foreach ($this->domains as $domain)
-                    <flux:select.option value="{{ $domain->domain_id }}">{{ $domain->domain_name }} ({{ $domain->domain_id }})</flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="domainId"
+                :options="$this->domains->pluck('label', 'domain_id')"
+                placeholder="Pilih Wilayah..." />
         </div>
         <div class="w-64">
-            <flux:select wire:model.live="subcatId" placeholder="Semua Kategori">
-                <flux:select.option value="">Semua Kategori</flux:select.option>
-                @foreach ($this->categories as $category)
-                    <flux:select.option value="{{ $category->subcat_id }}">{{ $category->title }}</flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="subcatId"
+                :options="$this->categories->pluck('title', 'subcat_id')"
+                null-label="Semua Kategori" />
         </div>
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID atau judul subjek')" icon="magnifying-glass" />
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">{{ __('No.') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('ID Subjek') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('Judul') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('Kategori') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('Sync terakhir') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($this->subjects as $subject)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $this->subjects->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $subject->sub_id }}</td>
-                        <td class="px-4 py-3">{{ $subject->title }}</td>
-                        <td class="px-4 py-3">
-                            @if ($subject->category)
-                                {{ $subject->category->title }}
-                            @else
-                                <span class="text-neutral-500">-</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3">{{ $subject->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center">
-                            {{ __('Belum ada data untuk wilayah ini. Klik Fetch Data untuk mengambil dari BPS.') }}
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $this->subjects->links() }}
+    <x-data-table :rows="$this->subjects" :columns="$columns" empty="Belum ada data untuk wilayah ini. Klik Fetch Data untuk mengambil dari BPS." />
 </div>
