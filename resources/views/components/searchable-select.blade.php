@@ -19,8 +19,8 @@
     >
         <span
             class="truncate"
-            x-text="selectedLabel() || @js($placeholder)"
-            x-bind:class="selectedLabel() ? '' : 'text-zinc-400'"
+            x-text="label || @js($placeholder)"
+            x-bind:class="label ? '' : 'text-zinc-400'"
         ></span>
         <flux:icon.chevron-down variant="micro" class="size-4 shrink-0 text-zinc-400" />
     </button>
@@ -70,7 +70,7 @@
                 </li>
             @endforeach
 
-            <li x-show="!hasResults()" class="px-3 py-2 text-sm text-zinc-400">
+            <li x-show="noResults" class="px-3 py-2 text-sm text-zinc-400">
                 {{ __('Tidak ada hasil') }}
             </li>
         </ul>
