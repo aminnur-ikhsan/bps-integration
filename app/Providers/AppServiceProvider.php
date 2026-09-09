@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Services\Bps\BpsClient;
+use App\Services\Bps\BpsClientPool;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(BpsClient::class, fn () => new BpsClient(
+            config('services.bps.base_url'),
+            config('services.bps.key') ?? '',
+        ));
+
+        $this->app->singleton(BpsClientPool::class, fn () => new BpsClientPool(
             config('services.bps.base_url'),
             config('services.bps.key') ?? '',
         ));

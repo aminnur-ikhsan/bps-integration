@@ -22,4 +22,9 @@ class BpsDomain extends Model
             'last_synced_at' => 'datetime',
         ];
     }
+
+    public function getLabelAttribute(): string
+    {
+        return "{$this->domain_name} ({$this->domain_id})";
+    }
 }

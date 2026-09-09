@@ -66,6 +66,17 @@ new #[Title('Kategori Subjek BPS')] class extends Component {
 
         return $query->orderBy('subcat_id')->paginate(25);
     }
+
+    public function with(): array
+    {
+        return [
+            'columns' => [
+                ['label' => 'ID Kategori', 'field' => 'subcat_id'],
+                ['label' => 'Judul', 'field' => 'title'],
+                ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
+            ],
+        ];
+    }
 }; ?>
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -86,45 +97,15 @@ new #[Title('Kategori Subjek BPS')] class extends Component {
 
     <div class="flex items-center gap-4">
         <div class="w-64">
-            <flux:select wire:model.live="domainId" placeholder="Pilih Wilayah...">
-                @foreach ($this->domains as $domain)
-                    <flux:select.option value="{{ $domain->domain_id }}">{{ $domain->domain_name }} ({{ $domain->domain_id }})</flux:select.option>
-                @endforeach
-            </flux:select>
+            <x-searchable-select
+                wire:model.live="domainId"
+                :options="$this->domains->pluck('label', 'domain_id')"
+                placeholder="Pilih Wilayah..." />
         </div>
         <div class="flex-1">
             <flux:input wire:model.live.debounce.300ms="search" :placeholder="__('Cari ID atau judul kategori')" icon="magnifying-glass" />
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table class="w-full text-left text-sm">
-            <thead class="border-b border-neutral-200 dark:border-neutral-700">
-                <tr>
-                    <th class="px-4 py-3 font-medium">{{ __('No.') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('ID Kategori') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('Judul') }}</th>
-                    <th class="px-4 py-3 font-medium">{{ __('Sync terakhir') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($this->categories as $category)
-                    <tr class="border-b border-neutral-100 last:border-0 dark:border-neutral-800">
-                        <td class="px-4 py-3 text-neutral-500">{{ $this->categories->firstItem() + $loop->index }}</td>
-                        <td class="px-4 py-3">{{ $category->subcat_id }}</td>
-                        <td class="px-4 py-3">{{ $category->title }}</td>
-                        <td class="px-4 py-3">{{ $category->last_synced_at?->locale('id')->translatedFormat('d F Y, H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center">
-                            {{ __('Belum ada data untuk wilayah ini. Klik Fetch Data untuk mengambil dari BPS.') }}
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{ $this->categories->links() }}
+    <x-data-table :rows="$this->categories" :columns="$columns" empty="Belum ada data untuk wilayah ini. Klik Fetch Data untuk mengambil dari BPS." />
 </div>

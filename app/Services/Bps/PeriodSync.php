@@ -1,37 +1,38 @@
 <?php
 
+// app/Services/Bps/PeriodSync.php
+
 namespace App\Services\Bps;
 
 use App\Models\BpsFetchLog;
-use App\Models\BpsSubject;
+use App\Models\BpsPeriod;
 use Carbon\CarbonInterface;
 
-class SubjectSync
+class PeriodSync
 {
     public function __construct(private BpsClient $client) {}
 
-    public function sync(string $domainId, ?int $userId = null): SyncResult
+    public function sync(string $domainId, ?int $varId = null, ?int $userId = null): SyncResult
     {
-        set_time_limit(300); // Prevent PHP timeout for sequential API fetches
+        set_time_limit(300);
         $startedAt = microtime(true);
-        $params = [
-            'model' => 'subject',
+        $params = array_filter([
+            'model' => 'th',
             'domain' => $domainId,
             'lang' => 'ind',
-        ];
+            'var' => $varId,
+        ], fn ($v) => $v !== null);
 
         try {
             $rows = $this->fetchAllPages($params);
             $syncedAt = now();
 
-            $this->store($rows, $domainId, $syncedAt);
-
+            $this->store($rows, $domainId, $varId, $syncedAt);
             $this->log($params, 'success', count($rows), $startedAt, $userId);
 
             return new SyncResult(count($rows), $syncedAt);
         } catch (BpsApiException $e) {
             $this->log($params, 'failed', null, $startedAt, $userId, $e);
-
             throw $e;
         }
     }
@@ -43,8 +44,7 @@ class SubjectSync
         $lastPage = 1;
 
         do {
-            $currentParams = array_merge($params, ['page' => $page]);
-            $body = $this->client->get('list', $currentParams);
+            $body = $this->client->get('list', array_merge($params, ['page' => $page]));
 
             if (($body['data-availability'] ?? null) !== 'available') {
                 break;
@@ -58,8 +58,8 @@ class SubjectSync
             }
 
             foreach ($items as $item) {
-                if (! is_array($item) || ! isset($item['sub_id'], $item['title'])) {
-                    throw new BpsApiException('Bentuk data subject dari BPS tidak dikenali.');
+                if (! is_array($item) || ! isset($item['th_id'], $item['th'])) {
+                    throw new BpsApiException('Bentuk data period dari BPS tidak dikenali.');
                 }
             }
 
@@ -71,7 +71,7 @@ class SubjectSync
         return $rows;
     }
 
-    private function store(array $rows, string $domainId, CarbonInterface $syncedAt): void
+    private function store(array $rows, string $domainId, ?int $varId, CarbonInterface $syncedAt): void
     {
         if ($rows === []) {
             return;
@@ -82,47 +82,33 @@ class SubjectSync
         foreach ($rows as $row) {
             $records[] = [
                 'domain_id' => $domainId,
-                'sub_id' => $row['sub_id'],
-                'subcat_id' => $row['subcat_id'] ?? null,
-                'title' => $row['title'],
+                'var_id' => $varId,
+                'th_id' => $row['th_id'],
+                'th' => (string) $row['th'],
                 'last_synced_at' => $syncedAt,
                 'created_at' => $syncedAt,
                 'updated_at' => $syncedAt,
             ];
         }
 
-        BpsSubject::upsert(
+        BpsPeriod::upsert(
             $records,
-            ['domain_id', 'sub_id'],
-            ['subcat_id', 'title', 'last_synced_at', 'updated_at'],
+            ['domain_id', 'th_id'],
+            ['var_id', 'th', 'last_synced_at', 'updated_at'],
         );
     }
 
-    private function log(
-        array $params,
-        string $status,
-        ?int $count,
-        float $startedAt,
-        ?int $userId,
-        ?BpsApiException $error = null,
-    ): void {
-        $httpStatus = null;
-        $errorMessage = null;
-
-        if ($error !== null) {
-            $httpStatus = $error->httpStatus;
-            $errorMessage = $error->cause ?? $error->getMessage();
-        }
-
+    private function log(array $params, string $status, ?int $count, float $startedAt, ?int $userId, ?BpsApiException $error = null): void
+    {
         BpsFetchLog::create([
             'user_id' => $userId,
             'endpoint' => 'list',
             'params' => $params,
             'status' => $status,
-            'http_status' => $httpStatus,
+            'http_status' => $error?->httpStatus,
             'records_count' => $count,
             'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
-            'error' => $errorMessage,
+            'error' => $error ? ($error->cause ?? $error->getMessage()) : null,
             'created_at' => now(),
         ]);
     }
