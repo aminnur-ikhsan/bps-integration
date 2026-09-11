@@ -2,7 +2,10 @@
 
 namespace App\Services\Bps;
 
+use App\Models\BpsConnectionLog;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class BpsClient
@@ -31,6 +34,8 @@ class BpsClient
             );
         }
 
+        $this->logConnection($response, $path, $query);
+
         if ($response->failed()) {
             throw new BpsApiException('Permintaan ke BPS gagal.', $response->status());
         }
@@ -46,5 +51,33 @@ class BpsClient
         }
 
         return $body;
+    }
+
+    // Catat satu baris koneksi. Gagal insert tidak boleh menggagalkan request BPS.
+    private function logConnection(Response $response, string $path, array $query): void
+    {
+        $stats = $response->handlerStats();
+
+        try {
+            BpsConnectionLog::create([
+                'user_id' => Auth::id(),
+                'method' => 'GET',
+                'base_url' => $this->baseUrl,
+                'path' => $path,
+                'http_status' => $response->status(),
+                'dns_ms' => round(($stats['namelookup_time'] ?? 0) * 1000),
+                'connect_ms' => round(($stats['connect_time'] ?? 0) * 1000),
+                'ttfb_ms' => round(($stats['starttransfer_time'] ?? 0) * 1000),
+                'total_ms' => round(($stats['total_time'] ?? 0) * 1000),
+                'response_bytes' => strlen($response->body()),
+                'request_header' => $response->transferStats?->getRequest()?->getHeaders(),
+                'request_parameters' => array_merge($query, ['key' => '***']),
+                'response_header' => $response->headers(),
+                'response_body' => $response->json(),
+                'created_at' => now(),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }
