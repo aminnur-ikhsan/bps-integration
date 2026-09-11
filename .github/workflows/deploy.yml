@@ -29,9 +29,7 @@ jobs:
 
             docker compose build
             docker compose up -d
-            # nginx pakai image stock + bind mount 1 file (docker/nginx.conf).
-            # Compose gak recreate container itu otomatis walau isi file berubah,
-            # jadi dipaksa tiap deploy biar config nginx selalu fresh.
+            # Paksa fresh, config nginx gak auto-reload
             docker compose up -d --force-recreate nginx
 
             docker compose exec -T app composer install --no-dev --optimize-autoloader
