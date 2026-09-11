@@ -16,7 +16,9 @@ class BpsClient
     ) {}
 
     // Ambil satu halaman dari sebuah endpoint BPS dan kembalikan body JSON-nya.
-    public function get(string $path, array $query = []): array
+    // $logBody: default false — response_body di log koneksi disimpan null,
+    // biar tabel log tidak bengkak. Aktifkan per call site kalau lagi dibutuhkan.
+    public function get(string $path, array $query = [], bool $logBody = false): array
     {
         try {
             $response = Http::baseUrl($this->baseUrl)
@@ -34,7 +36,7 @@ class BpsClient
             );
         }
 
-        $this->logConnection($response, $path, $query);
+        $this->logConnection($response, $path, $query, $logBody);
 
         if ($response->failed()) {
             throw new BpsApiException('Permintaan ke BPS gagal.', $response->status());
@@ -54,7 +56,7 @@ class BpsClient
     }
 
     // Catat satu baris koneksi. Gagal insert tidak boleh menggagalkan request BPS.
-    private function logConnection(Response $response, string $path, array $query): void
+    private function logConnection(Response $response, string $path, array $query, bool $logBody): void
     {
         $stats = $response->handlerStats();
 
@@ -73,7 +75,7 @@ class BpsClient
                 'request_header' => $response->transferStats?->getRequest()?->getHeaders(),
                 'request_parameters' => array_merge($query, ['key' => '***']),
                 'response_header' => $response->headers(),
-                'response_body' => $response->json(),
+                'response_body' => $logBody ? $response->json() : null,
                 'created_at' => now(),
             ]);
         } catch (\Throwable $e) {
