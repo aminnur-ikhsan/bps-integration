@@ -29,6 +29,8 @@ jobs:
 
             docker compose build
             docker compose up -d
+            # Paksa fresh, config nginx gak auto-reload
+            docker compose up -d --force-recreate nginx
 
             docker compose exec -T app composer install --no-dev --optimize-autoloader
             docker compose --profile tools run --rm assets
