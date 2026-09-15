@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\Bps\DynamicData;
 
+use App\Models\BpsDerivedPeriod;
+use App\Models\BpsDerivedVariable;
 use App\Models\BpsDomain;
+use App\Models\BpsPeriod;
 use App\Models\BpsSubject;
 use App\Models\BpsSubjectCategory;
 use App\Models\BpsVariable;
+use App\Models\BpsVerticalVariable;
 use App\Models\User;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -110,5 +114,66 @@ class QueryBuilderPageTest extends TestCase
             ->set('subcatId', '900001')
             ->assertSet('subId', '')
             ->assertSet('varId', null);
+    }
+
+    public function test_choosing_a_table_shows_its_year_turunan_tahun_and_row_options(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi Bulanan (M-to-M)']);
+        BpsPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'th_id' => 900001, 'th' => '2025']);
+        BpsDerivedPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'turth_id' => 900001, 'turth' => 'Januari']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji Provinsi Jawa Barat']);
+
+        Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->assertSee('2025')
+            ->assertSee('Januari')
+            ->assertSee('Uji Provinsi Jawa Barat');
+    }
+
+    public function test_choosing_a_table_checks_all_row_titles_by_default(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi Bulanan (M-to-M)']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji Provinsi Jawa Barat']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900002, 'vervar' => 'Uji Kota Bandung']);
+
+        Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->assertSet('vervars', ['900001', '900002']);
+    }
+
+    public function test_the_characteristic_box_is_hidden_when_the_table_has_none(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900002, 'title' => 'Uji Angka Partisipasi Murni']);
+
+        Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900002')
+            ->assertDontSee('Karakteristik');
+    }
+
+    public function test_choosing_a_different_table_clears_the_previous_selections(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi Bulanan (M-to-M)']);
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900002, 'title' => 'Uji Angka Partisipasi Murni']);
+        BpsPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'th_id' => 900001, 'th' => '2025']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900002, 'vervar_id' => 900001, 'vervar' => 'Uji Jawa Barat']);
+
+        Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->set('years', ['900001'])
+            ->set('varId', '900002')
+            ->assertSet('years', [])
+            ->assertSet('vervars', ['900001']);
     }
 }
