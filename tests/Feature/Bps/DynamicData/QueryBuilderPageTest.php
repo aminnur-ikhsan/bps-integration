@@ -176,4 +176,88 @@ class QueryBuilderPageTest extends TestCase
             ->assertSet('years', [])
             ->assertSet('vervars', ['900001']);
     }
+
+    public function test_tambah_does_nothing_when_required_boxes_are_empty(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi Bulanan (M-to-M)']);
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->call('tambah');
+
+        $this->assertSame([], $component->instance()->selected);
+    }
+
+    public function test_tambah_adds_the_table_with_a_full_selection(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi Bulanan (M-to-M)']);
+        BpsPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'th_id' => 900001, 'th' => '2025']);
+        BpsDerivedPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'turth_id' => 900001, 'turth' => 'Januari']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji Provinsi Jawa Barat']);
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->set('years', ['900001'])
+            ->set('turyears', ['900001'])
+            ->call('tambah');
+
+        $selected = $component->instance()->selected;
+
+        $this->assertCount(1, $selected);
+        $this->assertSame('900001', $selected[0]['var_id']);
+        $this->assertSame('Uji Inflasi Bulanan (M-to-M)', $selected[0]['title']);
+        $this->assertSame(['900001'], $selected[0]['years']);
+        $this->assertSame(['900001'], $selected[0]['turyears']);
+        $this->assertSame([], $selected[0]['characteristics']);
+        $this->assertSame(['900001'], $selected[0]['vervars']);
+
+        $component->assertSet('varId', null);
+    }
+
+    public function test_tambah_requires_a_characteristic_only_when_the_table_has_one(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi Bulanan (M-to-M)']);
+        BpsPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'th_id' => 900001, 'th' => '2025']);
+        BpsDerivedPeriod::create(['domain_id' => '3200', 'var_id' => 900001, 'turth_id' => 900001, 'turth' => 'Januari']);
+        BpsDerivedVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'turvar_id' => 900001, 'turvar' => 'Uji Provinsi Jawa Barat']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji Umum']);
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->set('years', ['900001'])
+            ->set('turyears', ['900001'])
+            ->call('tambah');
+
+        $this->assertSame([], $component->instance()->selected);
+
+        $component->set('characteristics', ['900001'])->call('tambah');
+
+        $this->assertCount(1, $component->instance()->selected);
+    }
+
+    public function test_hapus_removes_an_entry_and_clears_the_previous_result(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        $entryOne = ['var_id' => '900001', 'title' => 'Satu', 'years' => ['900001'], 'turyears' => ['900001'], 'characteristics' => [], 'vervars' => ['900001']];
+        $entryTwo = ['var_id' => '900002', 'title' => 'Dua', 'years' => ['900001'], 'turyears' => ['900001'], 'characteristics' => [], 'vervars' => ['900001']];
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('selected', [$entryOne, $entryTwo])
+            ->set('resultJson', '[]')
+            ->call('hapus', 0);
+
+        $this->assertSame([$entryTwo], array_values($component->instance()->selected));
+        $component->assertSet('resultJson', null);
+    }
 }

@@ -24,6 +24,9 @@ new #[Title('Data Dinamis')] class extends Component {
     public array $characteristics = [];
     public array $vervars = [];
 
+    public array $selected = [];
+    public ?string $resultJson = null;
+
     public function updatedSubcatId(): void
     {
         $this->subId = '';
@@ -59,6 +62,37 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyears = [];
         $this->characteristics = [];
         $this->vervars = [];
+    }
+
+    public function aturUlang(): void
+    {
+        $this->resetTableForm();
+    }
+
+    public function tambah(): void
+    {
+        if (! $this->canAdd) {
+            return;
+        }
+
+        $this->selected[] = [
+            'var_id' => $this->varId,
+            'title' => BpsVariable::where('domain_id', self::DOMAIN)->where('var_id', $this->varId)->value('title'),
+            'years' => $this->years,
+            'turyears' => $this->turyears,
+            'characteristics' => $this->characteristics,
+            'vervars' => $this->vervars,
+        ];
+
+        $this->resultJson = null;
+        $this->resetTableForm();
+    }
+
+    public function hapus(int $index): void
+    {
+        unset($this->selected[$index]);
+        $this->selected = array_values($this->selected);
+        $this->resultJson = null;
     }
 
     #[Computed]
@@ -130,6 +164,24 @@ new #[Title('Data Dinamis')] class extends Component {
 
         return BpsVerticalVariable::where('domain_id', self::DOMAIN)->where('var_id', $this->varId)->orderBy('vervar_id')->get();
     }
+
+    #[Computed]
+    public function canAdd(): bool
+    {
+        if (! $this->varId) {
+            return false;
+        }
+
+        if (count($this->years) === 0 || count($this->turyears) === 0 || count($this->vervars) === 0) {
+            return false;
+        }
+
+        if ($this->characteristicOptions->isNotEmpty() && count($this->characteristics) === 0) {
+            return false;
+        }
+
+        return true;
+    }
 }; ?>
 
 <div class="flex h-full w-full flex-1 flex-col gap-6">
@@ -193,6 +245,34 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
                     empty="Belum ada data judul baris untuk tabel ini." />
             </div>
+
+            <div class="flex gap-2">
+                <flux:button wire:click="aturUlang" variant="ghost">{{ __('Atur Ulang') }}</flux:button>
+                <flux:button wire:click="tambah" variant="primary" icon="plus" :disabled="! $this->canAdd">
+                    {{ __('Tambah') }}
+                </flux:button>
+            </div>
         @endif
     </div>
+
+    @if ($selected !== [])
+        <div class="flex flex-col gap-2">
+            <flux:heading size="sm">{{ __('Data Terpilih') }} ({{ count($selected) }})</flux:heading>
+
+            @foreach ($selected as $index => $entry)
+                <div class="flex items-start justify-between gap-4 rounded-xl border border-zinc-200 p-3 dark:border-white/10">
+                    <div>
+                        <p class="text-sm font-medium">{{ $entry['title'] }}</p>
+                        <p class="text-xs text-zinc-500">
+                            {{ count($entry['years']) }} tahun,
+                            {{ count($entry['turyears']) }} turunan tahun,
+                            {{ count($entry['characteristics']) }} karakteristik,
+                            {{ count($entry['vervars']) }} judul baris
+                        </p>
+                    </div>
+                    <flux:button wire:click="hapus({{ $index }})" variant="ghost" size="sm" icon="trash" />
+                </div>
+            @endforeach
+        </div>
+    @endif
 </div>
