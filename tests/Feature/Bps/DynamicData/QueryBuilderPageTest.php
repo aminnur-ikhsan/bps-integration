@@ -260,4 +260,66 @@ class QueryBuilderPageTest extends TestCase
         $this->assertSame([$entryTwo], array_values($component->instance()->selected));
         $component->assertSet('resultJson', null);
     }
+
+    public function test_submit_builds_one_json_object_per_selected_table_with_the_key_masked(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        $entryOne = ['var_id' => '900001', 'title' => 'Uji Inflasi', 'years' => ['900001'], 'turyears' => ['900001', '900002'], 'characteristics' => ['900001'], 'vervars' => ['900001', '900002']];
+        $entryTwo = ['var_id' => '900002', 'title' => 'Uji APM', 'years' => ['900002', '900003'], 'turyears' => ['900001'], 'characteristics' => [], 'vervars' => ['900003', '900004']];
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('selected', [$entryOne, $entryTwo])
+            ->call('submit');
+
+        $decoded = json_decode($component->instance()->resultJson, true);
+
+        $this->assertCount(2, $decoded);
+
+        $this->assertSame('data', $decoded[0]['model']);
+        $this->assertSame('3200', $decoded[0]['domain']);
+        $this->assertSame('ind', $decoded[0]['lang']);
+        $this->assertSame(900001, $decoded[0]['var']);
+        $this->assertSame('900001', $decoded[0]['th']);
+        $this->assertSame('900001;900002', $decoded[0]['turth']);
+        $this->assertSame('900001', $decoded[0]['turvar']);
+        $this->assertSame('900001;900002', $decoded[0]['vervar']);
+        $this->assertSame('****', $decoded[0]['key']);
+
+        $this->assertSame(900002, $decoded[1]['var']);
+        $this->assertSame('900002;900003', $decoded[1]['th']);
+    }
+
+    public function test_submit_omits_turvar_when_the_table_has_no_characteristics(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        $entry = ['var_id' => '900002', 'title' => 'Uji APM', 'years' => ['900002'], 'turyears' => ['900001'], 'characteristics' => [], 'vervars' => ['900003']];
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('selected', [$entry])
+            ->call('submit');
+
+        $decoded = json_decode($component->instance()->resultJson, true);
+
+        $this->assertArrayNotHasKey('turvar', $decoded[0]);
+    }
+
+    public function test_submit_sorts_and_joins_multiple_ids_numerically(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        $entry = ['var_id' => '900001', 'title' => 'Uji Inflasi', 'years' => ['900001'], 'turyears' => ['900001'], 'characteristics' => [], 'vervars' => ['900010', '900002', '900009']];
+
+        $component = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('selected', [$entry])
+            ->call('submit');
+
+        $decoded = json_decode($component->instance()->resultJson, true);
+
+        $this->assertSame('900002;900009;900010', $decoded[0]['vervar']);
+    }
 }

@@ -95,6 +95,51 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->resultJson = null;
     }
 
+    public function submit(): void
+    {
+        $params = [];
+
+        foreach ($this->selected as $entry) {
+            $params[] = $this->buildParams($entry);
+        }
+
+        $this->resultJson = json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    private function buildParams(array $entry): array
+    {
+        $params = [
+            'model' => 'data',
+            'domain' => self::DOMAIN,
+            'lang' => 'ind',
+            'var' => (int) $entry['var_id'],
+            'th' => $this->joinIds($entry['years']),
+            'turth' => $this->joinIds($entry['turyears']),
+        ];
+
+        if ($entry['characteristics'] !== []) {
+            $params['turvar'] = $this->joinIds($entry['characteristics']);
+        }
+
+        $params['vervar'] = $this->joinIds($entry['vervars']);
+        $params['key'] = '****';
+
+        return $params;
+    }
+
+    private function joinIds(array $ids): string
+    {
+        $numeric = [];
+
+        foreach ($ids as $id) {
+            $numeric[] = (int) $id;
+        }
+
+        sort($numeric);
+
+        return implode(';', $numeric);
+    }
+
     #[Computed]
     public function categories()
     {
@@ -273,6 +318,22 @@ new #[Title('Data Dinamis')] class extends Component {
                     <flux:button wire:click="hapus({{ $index }})" variant="ghost" size="sm" icon="trash" />
                 </div>
             @endforeach
+
+            <flux:button wire:click="submit" variant="primary">{{ __('Submit') }}</flux:button>
+        </div>
+    @endif
+
+    @if ($resultJson)
+        <div class="relative" x-data>
+            <flux:button
+                class="absolute right-2 top-2"
+                size="sm"
+                icon="clipboard"
+                x-on:click="navigator.clipboard.writeText($refs.jsonBlock.innerText)">
+                {{ __('Salin') }}
+            </flux:button>
+
+            <pre x-ref="jsonBlock" class="overflow-x-auto rounded-lg bg-zinc-100 p-4 text-xs dark:bg-zinc-800">{{ $resultJson }}</pre>
         </div>
     @endif
 </div>
