@@ -252,32 +252,32 @@ new #[Title('Data Dinamis')] class extends Component {
 
     @if ($varId)
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div class="lg:col-start-1 lg:row-start-1">
-                <flux:label>{{ __('Tahun') }}</flux:label>
+            <div class="lg:col-start-1 lg:row-start-1 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
+                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Tahun') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="years"
                     :options="$this->yearOptions->pluck('th', 'th_id')"
                     empty="Belum ada data tahun untuk tabel ini." />
             </div>
 
-            <div class="lg:col-start-1 lg:row-start-2">
-                <flux:label>{{ __('Turunan Tahun') }}</flux:label>
+            <div class="lg:col-start-1 lg:row-start-2 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
+                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Turunan Tahun') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="turyears"
                     :options="$this->turyearOptions->pluck('turth', 'turth_id')"
                     empty="Belum ada data turunan tahun untuk tabel ini." />
             </div>
 
-            <div class="lg:col-start-2 lg:row-start-1">
-                <flux:label>{{ __('Karakteristik') }}</flux:label>
+            <div class="lg:col-start-2 lg:row-start-1 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
+                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Karakteristik') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="characteristics"
                     :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
                     empty="Belum ada data karakteristik untuk tabel ini." />
             </div>
 
-            <div class="lg:col-start-3 lg:row-start-1 lg:row-span-2">
-                <flux:label>{{ __('Judul Baris') }}</flux:label>
+            <div class="lg:col-start-3 lg:row-start-1 lg:row-span-2 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
+                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Judul Baris') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="vervars"
                     :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
