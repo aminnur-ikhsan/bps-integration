@@ -251,8 +251,8 @@ new #[Title('Data Dinamis')] class extends Component {
     </div>
 
     @if ($varId)
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="lg:col-start-1 lg:row-start-1">
                 <flux:label>{{ __('Tahun') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="years"
@@ -260,7 +260,7 @@ new #[Title('Data Dinamis')] class extends Component {
                     empty="Belum ada data tahun untuk tabel ini." />
             </div>
 
-            <div>
+            <div class="lg:col-start-1 lg:row-start-2">
                 <flux:label>{{ __('Turunan Tahun') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="turyears"
@@ -268,7 +268,7 @@ new #[Title('Data Dinamis')] class extends Component {
                     empty="Belum ada data turunan tahun untuk tabel ini." />
             </div>
 
-            <div>
+            <div class="lg:col-start-2 lg:row-start-1">
                 <flux:label>{{ __('Karakteristik') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="characteristics"
@@ -276,7 +276,7 @@ new #[Title('Data Dinamis')] class extends Component {
                     empty="Belum ada data karakteristik untuk tabel ini." />
             </div>
 
-            <div>
+            <div class="lg:col-start-3 lg:row-start-1 lg:row-span-2">
                 <flux:label>{{ __('Judul Baris') }}</flux:label>
                 <x-checkbox-group
                     wire:model.live="vervars"
