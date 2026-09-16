@@ -274,14 +274,13 @@ new #[Title('Data Dinamis')] class extends Component {
                     empty="Belum ada data turunan tahun untuk tabel ini." />
             </div>
 
-            @if ($this->characteristicOptions->isNotEmpty())
-                <div>
-                    <flux:label>{{ __('Karakteristik') }}</flux:label>
-                    <x-checkbox-group
-                        wire:model.live="characteristics"
-                        :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')" />
-                </div>
-            @endif
+            <div>
+                <flux:label>{{ __('Karakteristik') }}</flux:label>
+                <x-checkbox-group
+                    wire:model.live="characteristics"
+                    :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
+                    empty="Belum ada data karakteristik untuk tabel ini." />
+            </div>
 
             <div>
                 <flux:label>{{ __('Judul Baris') }}</flux:label>
