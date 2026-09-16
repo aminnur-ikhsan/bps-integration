@@ -40,19 +40,11 @@ new #[Title('Data Dinamis')] class extends Component {
 
     public function updatedVarId(): void
     {
+        // Semua kotak mulai kosong — user yang pilih sendiri, tidak ada default tercentang.
         $this->years = [];
         $this->turyears = [];
         $this->characteristics = [];
         $this->vervars = [];
-
-        if (! $this->varId) {
-            return;
-        }
-
-        // Default: semua Judul Baris tercentang, sama seperti situs asli.
-        foreach ($this->vervarOptions as $vervar) {
-            $this->vervars[] = (string) $vervar->vervar_id;
-        }
     }
 
     private function resetTableForm(): void
@@ -256,8 +248,10 @@ new #[Title('Data Dinamis')] class extends Component {
                 :options="$this->variables->pluck('label', 'var_id')"
                 placeholder="Cari tabel..." />
         </div>
+    </div>
 
-        @if ($varId)
+    @if ($varId)
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
                 <flux:label>{{ __('Tahun') }}</flux:label>
                 <x-checkbox-group
@@ -289,15 +283,15 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
                     empty="Belum ada data judul baris untuk tabel ini." />
             </div>
+        </div>
 
-            <div class="flex gap-2">
-                <flux:button wire:click="aturUlang" variant="ghost">{{ __('Atur Ulang') }}</flux:button>
-                <flux:button wire:click="tambah" variant="primary" icon="plus" :disabled="! $this->canAdd">
-                    {{ __('Tambah') }}
-                </flux:button>
-            </div>
-        @endif
-    </div>
+        <div class="flex gap-2">
+            <flux:button wire:click="aturUlang" variant="ghost">{{ __('Atur Ulang') }}</flux:button>
+            <flux:button wire:click="tambah" variant="primary" icon="plus" :disabled="! $this->canAdd">
+                {{ __('Tambah') }}
+            </flux:button>
+        </div>
+    @endif
 
     @if ($selected !== [])
         <div class="flex flex-col gap-2">

@@ -7,6 +7,8 @@
     <p class="text-sm text-zinc-400 dark:text-zinc-500">{{ $empty }}</p>
 @else
     <flux:checkbox.group {{ $attributes }}>
+        <flux:checkbox.all label="{{ __('Pilih Semua') }}" />
+
         @foreach ($options as $value => $label)
             <flux:checkbox value="{{ $value }}" label="{{ $label }}" />
         @endforeach
