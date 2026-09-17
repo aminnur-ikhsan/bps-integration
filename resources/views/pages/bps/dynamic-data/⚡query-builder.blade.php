@@ -24,6 +24,11 @@ new #[Title('Data Dinamis')] class extends Component {
     public array $characteristics = [];
     public array $vervars = [];
 
+    public string $yearSearch = '';
+    public string $turyearSearch = '';
+    public string $characteristicSearch = '';
+    public string $vervarSearch = '';
+
     public array $selected = [];
     public ?string $resultJson = null;
 
@@ -45,6 +50,10 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyears = [];
         $this->characteristics = [];
         $this->vervars = [];
+        $this->yearSearch = '';
+        $this->turyearSearch = '';
+        $this->characteristicSearch = '';
+        $this->vervarSearch = '';
     }
 
     private function resetTableForm(): void
@@ -54,6 +63,10 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyears = [];
         $this->characteristics = [];
         $this->vervars = [];
+        $this->yearSearch = '';
+        $this->turyearSearch = '';
+        $this->characteristicSearch = '';
+        $this->vervarSearch = '';
     }
 
     public function aturUlang(): void
@@ -169,7 +182,13 @@ new #[Title('Data Dinamis')] class extends Component {
             return collect();
         }
 
-        return BpsPeriod::where('domain_id', self::DOMAIN)->where('var_id', $this->varId)->orderBy('th_id')->get();
+        $query = BpsPeriod::where('domain_id', self::DOMAIN)->where('var_id', $this->varId);
+
+        if ($this->yearSearch !== '') {
+            $query->where('th', 'ilike', '%'.$this->yearSearch.'%');
+        }
+
+        return $query->orderBy('th_id')->get();
     }
 
     #[Computed]
@@ -179,7 +198,13 @@ new #[Title('Data Dinamis')] class extends Component {
             return collect();
         }
 
-        return BpsDerivedPeriod::where('domain_id', self::DOMAIN)->where('var_id', $this->varId)->orderBy('turth_id')->get();
+        $query = BpsDerivedPeriod::where('domain_id', self::DOMAIN)->where('var_id', $this->varId);
+
+        if ($this->turyearSearch !== '') {
+            $query->where('turth', 'ilike', '%'.$this->turyearSearch.'%');
+        }
+
+        return $query->orderBy('turth_id')->get();
     }
 
     #[Computed]
@@ -189,7 +214,13 @@ new #[Title('Data Dinamis')] class extends Component {
             return collect();
         }
 
-        return BpsDerivedVariable::where('domain_id', self::DOMAIN)->where('var_id', $this->varId)->orderBy('turvar_id')->get();
+        $query = BpsDerivedVariable::where('domain_id', self::DOMAIN)->where('var_id', $this->varId);
+
+        if ($this->characteristicSearch !== '') {
+            $query->where('turvar', 'ilike', '%'.$this->characteristicSearch.'%');
+        }
+
+        return $query->orderBy('turvar_id')->get();
     }
 
     #[Computed]
@@ -199,7 +230,13 @@ new #[Title('Data Dinamis')] class extends Component {
             return collect();
         }
 
-        return BpsVerticalVariable::where('domain_id', self::DOMAIN)->where('var_id', $this->varId)->orderBy('vervar_id')->get();
+        $query = BpsVerticalVariable::where('domain_id', self::DOMAIN)->where('var_id', $this->varId);
+
+        if ($this->vervarSearch !== '') {
+            $query->where('vervar', 'ilike', '%'.$this->vervarSearch.'%');
+        }
+
+        return $query->orderBy('vervar_id')->get();
     }
 
     #[Computed]
