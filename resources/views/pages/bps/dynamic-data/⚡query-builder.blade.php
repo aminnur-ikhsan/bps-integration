@@ -395,11 +395,21 @@ new #[Title('Data Dinamis')] class extends Component {
                 empty="Belum ada data judul baris untuk tabel ini." />
         </div>
 
-        <div class="flex gap-2">
-            <flux:button wire:click="aturUlang" variant="ghost">{{ __('Atur Ulang') }}</flux:button>
-            <flux:button wire:click="tambah" variant="primary" icon="plus" :disabled="! $this->canAdd">
-                {{ __('Tambah') }}
-            </flux:button>
+        <div class="flex items-center justify-between gap-4 border-t border-zinc-200 pt-4 dark:border-white/10">
+            <p class="text-sm text-zinc-500">
+                @if ($this->canAdd)
+                    {{ count($years) }} {{ __('tahun') }} · {{ count($turyears) }} {{ __('turunan tahun') }} · {{ count($characteristics) }} {{ __('karakteristik') }} · {{ count($vervars) }} {{ __('judul baris') }}
+                @else
+                    {{ __('Pilih minimal satu di tiap bagian wajib untuk mengaktifkan Tambah.') }}
+                @endif
+            </p>
+
+            <div class="flex gap-2">
+                <flux:button wire:click="aturUlang" variant="ghost">{{ __('Atur Ulang') }}</flux:button>
+                <flux:button wire:click="tambah" variant="primary" icon="plus" :disabled="! $this->canAdd">
+                    {{ __('Tambah') }}
+                </flux:button>
+            </div>
         </div>
     @endif
 

@@ -225,4 +225,33 @@ class QueryBuilderPageTest extends TestCase
         $this->assertSame(1, substr_count($html, 'Pilih Semua'));
         $this->assertSame(3, substr_count($html, 'Belum ada data'));
     }
+
+    public function test_the_action_bar_shows_a_hint_when_tambah_is_locked(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+
+        Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->assertSee('Pilih minimal satu di tiap bagian wajib untuk mengaktifkan Tambah.');
+    }
+
+    public function test_the_action_bar_shows_a_summary_once_tambah_is_unlocked(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji A']);
+
+        Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->call('toggle', 'vervars', '900001')
+            ->set('years', ['900001'])
+            ->set('turyears', ['900001'])
+            ->assertSee('1 tahun · 1 turunan tahun · 0 karakteristik · 1 judul baris')
+            ->assertDontSee('Pilih minimal satu di tiap bagian wajib untuk mengaktifkan Tambah.');
+    }
 }
