@@ -332,7 +332,7 @@ new #[Title('Data Dinamis')] class extends Component {
     <flux:heading size="xl">{{ __('Data Dinamis') }}</flux:heading>
 
     <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div class="flex flex-col gap-6 lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-6">
+        <div class="flex flex-col gap-6 lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-6 lg:z-10">
             <div>
                 <flux:label>{{ __('Kategori Subjek') }}</flux:label>
                 <x-searchable-select
