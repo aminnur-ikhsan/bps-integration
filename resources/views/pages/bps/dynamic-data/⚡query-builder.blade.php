@@ -331,70 +331,74 @@ new #[Title('Data Dinamis')] class extends Component {
 <div class="flex h-full w-full flex-1 flex-col gap-6">
     <flux:heading size="xl">{{ __('Data Dinamis') }}</flux:heading>
 
-    <div class="flex max-w-xl flex-col gap-6">
-        <div>
-            <flux:label>{{ __('Kategori Subjek') }}</flux:label>
-            <x-searchable-select
-                wire:model.live="subcatId"
-                :options="$this->categories->pluck('title', 'subcat_id')"
-                null-label="Semua Kategori" />
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <div class="flex flex-col gap-6 lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-6">
+            <div>
+                <flux:label>{{ __('Kategori Subjek') }}</flux:label>
+                <x-searchable-select
+                    wire:model.live="subcatId"
+                    :options="$this->categories->pluck('title', 'subcat_id')"
+                    null-label="Semua Kategori" />
+            </div>
+
+            <div>
+                <flux:label>{{ __('Subjek') }}</flux:label>
+                <x-searchable-select
+                    wire:model.live="subId"
+                    :options="$this->subjects->pluck('title', 'sub_id')"
+                    null-label="Semua Subjek" />
+            </div>
+
+            <div>
+                <flux:label>{{ __('Tabel / Indikator') }}</flux:label>
+                <x-searchable-select
+                    wire:model.live="varId"
+                    :options="$this->variables->pluck('label', 'var_id')"
+                    placeholder="Cari tabel..." />
+            </div>
         </div>
 
-        <div>
-            <flux:label>{{ __('Subjek') }}</flux:label>
-            <x-searchable-select
-                wire:model.live="subId"
-                :options="$this->subjects->pluck('title', 'sub_id')"
-                null-label="Semua Subjek" />
-        </div>
+        @if ($varId)
+            <div class="flex flex-1 flex-col gap-4">
+                <x-selection-card
+                    label="{{ __('Tahun') }}"
+                    field="years"
+                    search-field="yearSearch"
+                    :options="$this->yearOptions->pluck('th', 'th_id')"
+                    :selected="$years"
+                    empty="Belum ada data tahun untuk tabel ini." />
 
-        <div>
-            <flux:label>{{ __('Tabel / Indikator') }}</flux:label>
-            <x-searchable-select
-                wire:model.live="varId"
-                :options="$this->variables->pluck('label', 'var_id')"
-                placeholder="Cari tabel..." />
-        </div>
+                <x-selection-card
+                    label="{{ __('Turunan Tahun') }}"
+                    field="turyears"
+                    search-field="turyearSearch"
+                    :options="$this->turyearOptions->pluck('turth', 'turth_id')"
+                    :selected="$turyears"
+                    :group-label="$this->turyearOptions->first()?->name_group_turth"
+                    empty="Belum ada data turunan tahun untuk tabel ini." />
+
+                <x-selection-card
+                    label="{{ __('Karakteristik') }}"
+                    field="characteristics"
+                    search-field="characteristicSearch"
+                    :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
+                    :selected="$characteristics"
+                    :group-label="$this->characteristicOptions->first()?->name_group_turvar"
+                    empty="Belum ada data karakteristik untuk tabel ini." />
+
+                <x-selection-card
+                    label="{{ __('Judul Baris') }}"
+                    field="vervars"
+                    search-field="vervarSearch"
+                    :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
+                    :selected="$vervars"
+                    :group-label="$this->vervarOptions->first()?->name_group_ver_id"
+                    empty="Belum ada data judul baris untuk tabel ini." />
+            </div>
+        @endif
     </div>
 
     @if ($varId)
-        <div class="flex flex-col gap-4">
-            <x-selection-card
-                label="{{ __('Tahun') }}"
-                field="years"
-                search-field="yearSearch"
-                :options="$this->yearOptions->pluck('th', 'th_id')"
-                :selected="$years"
-                empty="Belum ada data tahun untuk tabel ini." />
-
-            <x-selection-card
-                label="{{ __('Turunan Tahun') }}"
-                field="turyears"
-                search-field="turyearSearch"
-                :options="$this->turyearOptions->pluck('turth', 'turth_id')"
-                :selected="$turyears"
-                :group-label="$this->turyearOptions->first()?->name_group_turth"
-                empty="Belum ada data turunan tahun untuk tabel ini." />
-
-            <x-selection-card
-                label="{{ __('Karakteristik') }}"
-                field="characteristics"
-                search-field="characteristicSearch"
-                :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
-                :selected="$characteristics"
-                :group-label="$this->characteristicOptions->first()?->name_group_turvar"
-                empty="Belum ada data karakteristik untuk tabel ini." />
-
-            <x-selection-card
-                label="{{ __('Judul Baris') }}"
-                field="vervars"
-                search-field="vervarSearch"
-                :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
-                :selected="$vervars"
-                :group-label="$this->vervarOptions->first()?->name_group_ver_id"
-                empty="Belum ada data judul baris untuk tabel ini." />
-        </div>
-
         <div class="flex items-center justify-between gap-4 border-t border-zinc-200 pt-4 dark:border-white/10">
             <p class="text-sm text-zinc-500">
                 @if ($this->canAdd)
