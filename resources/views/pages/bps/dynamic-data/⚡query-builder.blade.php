@@ -358,38 +358,41 @@ new #[Title('Data Dinamis')] class extends Component {
     </div>
 
     @if ($varId)
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div class="lg:col-start-1 lg:row-start-1 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
-                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Tahun') }}</flux:label>
-                <x-checkbox-group
-                    wire:model.live="years"
-                    :options="$this->yearOptions->pluck('th', 'th_id')"
-                    empty="Belum ada data tahun untuk tabel ini." />
-            </div>
+        <div class="flex flex-col gap-4">
+            <x-selection-card
+                label="{{ __('Tahun') }}"
+                field="years"
+                search-field="yearSearch"
+                :options="$this->yearOptions->pluck('th', 'th_id')"
+                :selected="$years"
+                empty="Belum ada data tahun untuk tabel ini." />
 
-            <div class="lg:col-start-1 lg:row-start-2 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
-                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Turunan Tahun') }}</flux:label>
-                <x-checkbox-group
-                    wire:model.live="turyears"
-                    :options="$this->turyearOptions->pluck('turth', 'turth_id')"
-                    empty="Belum ada data turunan tahun untuk tabel ini." />
-            </div>
+            <x-selection-card
+                label="{{ __('Turunan Tahun') }}"
+                field="turyears"
+                search-field="turyearSearch"
+                :options="$this->turyearOptions->pluck('turth', 'turth_id')"
+                :selected="$turyears"
+                :group-label="$this->turyearOptions->first()?->name_group_turth"
+                empty="Belum ada data turunan tahun untuk tabel ini." />
 
-            <div class="lg:col-start-2 lg:row-start-1 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
-                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Karakteristik') }}</flux:label>
-                <x-checkbox-group
-                    wire:model.live="characteristics"
-                    :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
-                    empty="Belum ada data karakteristik untuk tabel ini." />
-            </div>
+            <x-selection-card
+                label="{{ __('Karakteristik') }}"
+                field="characteristics"
+                search-field="characteristicSearch"
+                :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
+                :selected="$characteristics"
+                :group-label="$this->characteristicOptions->first()?->name_group_turvar"
+                empty="Belum ada data karakteristik untuk tabel ini." />
 
-            <div class="lg:col-start-3 lg:row-start-1 lg:row-span-2 rounded-xl border border-zinc-200 p-4 dark:border-white/10">
-                <flux:label class="mb-2 block border-b border-zinc-200 pb-2 dark:border-white/10">{{ __('Judul Baris') }}</flux:label>
-                <x-checkbox-group
-                    wire:model.live="vervars"
-                    :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
-                    empty="Belum ada data judul baris untuk tabel ini." />
-            </div>
+            <x-selection-card
+                label="{{ __('Judul Baris') }}"
+                field="vervars"
+                search-field="vervarSearch"
+                :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
+                :selected="$vervars"
+                :group-label="$this->vervarOptions->first()?->name_group_ver_id"
+                empty="Belum ada data judul baris untuk tabel ini." />
         </div>
 
         <div class="flex gap-2">

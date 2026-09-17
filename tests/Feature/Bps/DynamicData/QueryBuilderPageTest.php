@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Bps\DynamicData;
 
+use App\Models\BpsDerivedPeriod;
 use App\Models\BpsDomain;
 use App\Models\BpsVariable;
 use App\Models\BpsVerticalVariable;
@@ -125,5 +126,103 @@ class QueryBuilderPageTest extends TestCase
         sort($selected);
 
         $this->assertSame(['900001', '900002'], $selected);
+    }
+
+    public function test_a_short_option_list_renders_as_toggle_chips(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji A']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900002, 'vervar' => 'Uji B']);
+
+        $html = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->html();
+
+        $this->assertStringContainsString("toggle('vervars', '900001')", $html);
+        $this->assertStringNotContainsString('wire:model.live="vervars"', $html);
+    }
+
+    public function test_more_than_twenty_options_render_as_a_searchable_list(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+
+        for ($i = 1; $i <= 21; $i++) {
+            BpsVerticalVariable::create([
+                'domain_id' => '3200',
+                'var_id' => 900001,
+                'vervar_id' => 900000 + $i,
+                'vervar' => 'Uji Wilayah '.$i,
+            ]);
+        }
+
+        $html = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->html();
+
+        $this->assertStringContainsString('wire:model.live.debounce.300ms="vervarSearch"', $html);
+        $this->assertStringContainsString('wire:model.live="vervars"', $html);
+    }
+
+    public function test_a_long_label_forces_list_mode_even_with_few_options(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+        BpsVerticalVariable::create([
+            'domain_id' => '3200',
+            'var_id' => 900001,
+            'vervar_id' => 900001,
+            'vervar' => 'Uji label yang sengaja dibuat sangat panjang sekali',
+        ]);
+
+        $html = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->html();
+
+        $this->assertStringContainsString('wire:model.live.debounce.300ms="vervarSearch"', $html);
+    }
+
+    public function test_group_label_shows_as_a_subtitle_when_present(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+        BpsDerivedPeriod::create([
+            'domain_id' => '3200',
+            'var_id' => 900001,
+            'turth_id' => 900001,
+            'turth' => 'Uji Januari',
+            'name_group_turth' => 'Uji Bulanan',
+        ]);
+
+        $html = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->html();
+
+        $this->assertStringContainsString('Uji Bulanan', $html);
+    }
+
+    public function test_empty_boxes_have_no_badge_or_pilih_semua_button(): void
+    {
+        $this->createDomain();
+        $this->actingAs(User::factory()->create());
+
+        BpsVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'title' => 'Uji Inflasi']);
+        BpsVerticalVariable::create(['domain_id' => '3200', 'var_id' => 900001, 'vervar_id' => 900001, 'vervar' => 'Uji A']);
+
+        $html = Livewire::test('pages::bps.dynamic-data.query-builder')
+            ->set('varId', '900001')
+            ->html();
+
+        $this->assertSame(1, substr_count($html, 'Pilih Semua'));
+        $this->assertSame(3, substr_count($html, 'Belum ada data'));
     }
 }
