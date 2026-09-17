@@ -15,6 +15,8 @@ use Livewire\Component;
 new #[Title('Data Dinamis')] class extends Component {
     private const DOMAIN = '3200';
 
+    private const array TOGGLE_FIELDS = ['years', 'turyears', 'characteristics', 'vervars'];
+
     public string $subcatId = '';
     public string $subId = '';
     public ?string $varId = null;
@@ -72,6 +74,74 @@ new #[Title('Data Dinamis')] class extends Component {
     public function aturUlang(): void
     {
         $this->resetTableForm();
+    }
+
+    public function toggle(string $field, string $value): void
+    {
+        if (! in_array($field, self::TOGGLE_FIELDS, true)) {
+            return;
+        }
+
+        $current = $this->{$field};
+
+        if (in_array($value, $current, true)) {
+            $this->{$field} = array_values(array_diff($current, [$value]));
+
+            return;
+        }
+
+        $current[] = $value;
+        $this->{$field} = $current;
+    }
+
+    public function toggleAll(string $field): void
+    {
+        if (! in_array($field, self::TOGGLE_FIELDS, true)) {
+            return;
+        }
+
+        // "Visible" = hasil query saat ini, sudah ikut terfilter pencarian
+        // kalau kotak cari sedang dipakai. Pilih Semua cuma bekerja pada apa
+        // yang sedang tampil, dan tidak boleh menghapus centang lain yang
+        // kebetulan sedang tidak tampil karena filter pencarian.
+        $visible = [];
+
+        foreach ($this->fieldOptions($field) as $option) {
+            $visible[] = (string) $option->{$this->fieldIdColumn($field)};
+        }
+
+        $current = $this->{$field};
+        $allVisibleAlreadySelected = array_diff($visible, $current) === [];
+
+        if ($allVisibleAlreadySelected) {
+            $this->{$field} = array_values(array_diff($current, $visible));
+
+            return;
+        }
+
+        $this->{$field} = array_values(array_unique(array_merge($current, $visible)));
+    }
+
+    private function fieldOptions(string $field): \Illuminate\Support\Collection
+    {
+        return match ($field) {
+            'years' => $this->yearOptions,
+            'turyears' => $this->turyearOptions,
+            'characteristics' => $this->characteristicOptions,
+            'vervars' => $this->vervarOptions,
+            default => collect(),
+        };
+    }
+
+    private function fieldIdColumn(string $field): string
+    {
+        return match ($field) {
+            'years' => 'th_id',
+            'turyears' => 'turth_id',
+            'characteristics' => 'turvar_id',
+            'vervars' => 'vervar_id',
+            default => '',
+        };
     }
 
     public function tambah(): void
