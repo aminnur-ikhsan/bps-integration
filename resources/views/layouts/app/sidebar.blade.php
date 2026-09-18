@@ -17,6 +17,12 @@
                     </flux:sidebar.item>
                 </flux:sidebar.group>
 
+                <flux:sidebar.group class="grid">
+                    <flux:sidebar.item icon="funnel" :href="route('bps.dynamic-data.query-builder')" :current="request()->routeIs('bps.dynamic-data.query-builder')" wire:navigate>
+                        {{ __('Data Dinamis') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
+
                 <flux:sidebar.group :heading="__('BPS')" class="grid">
                     <flux:sidebar.item icon="table-cells" :href="route('bps.domains')" :current="request()->routeIs('bps.domains')" wire:navigate>
                         {{ __('Domain BPS') }}
