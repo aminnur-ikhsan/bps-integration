@@ -41,6 +41,39 @@ Prasyarat: Docker, dan PostgreSQL yang sudah berjalan di luar project ini.
 
 4. Buka http://localhost:8080 dan login memakai `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
+## Open API untuk aplikasi lain
+
+Aplikasi lain mengambil data lewat `/api/v1/*` dengan Bearer Token. Token
+didaftarkan manual oleh developer:
+
+```bash
+docker compose exec app php artisan client-access:register "Nama Aplikasi"
+```
+
+Token plaintext hanya dicetak sekali. Database menyimpan hash SHA-256-nya, jadi
+token yang hilang tidak bisa dibaca ulang — daftarkan ulang dengan nama lain.
+
+Uji cepat:
+
+```bash
+curl -H "Authorization: Bearer <token>" http://localhost:8080/api/v1/ping
+```
+
+Balasan `200 {"status":"ok"}` kalau token valid. Tanpa token, token salah, atau
+klien yang `is_active`-nya false: `403 {"message":"Forbidden."}`.
+
+Setiap request masuk tercatat di `data_access_clients.api_request_logs`,
+termasuk yang ditolak. Header `authorization` disamarkan (`Bearer *****`), tidak
+disimpan mentah. Isi response hanya disimpan untuk route yang ditandai:
+
+```php
+Route::get('data-sampel', [DataSampelController::class, 'index'])
+    ->middleware('saving_body_response');
+```
+
+Collection Postman ada di `docs/api/bps-integration.postman_collection.json`
+(folder `docs` di-gitignore, jadi file itu tidak ikut di repo).
+
 ## Test
 
 ```bash
