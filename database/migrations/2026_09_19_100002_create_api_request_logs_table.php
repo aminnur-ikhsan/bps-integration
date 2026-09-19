@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('data_access_clients.api_request_logs', function (Blueprint $table) {
             $table->id();
-            // Null kalau tokennya tidak dikenal, jadi request yang ditolak tetap tercatat.
+            // Null kalau tokennya tidak dikenal.
             $table->unsignedBigInteger('api_client_id')->nullable();
             $table->string('method', 10)->default('GET');
             $table->string('path');

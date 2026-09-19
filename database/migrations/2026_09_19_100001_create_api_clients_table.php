@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('data_access_clients.api_clients', function (Blueprint $table) {
             $table->id();
             $table->string('app_name')->unique();
-            // Yang disimpan hash SHA-256 dari token, bukan tokennya sendiri.
+            // Hash SHA-256, bukan token plaintext.
             $table->string('token', 64)->unique();
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_used_at')->nullable();

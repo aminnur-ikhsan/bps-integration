@@ -47,9 +47,7 @@ class LogApiRequest
     }
 
     /**
-     * Header authorization berisi token mentah milik klien, jadi nilainya
-     * disamarkan. Skema (mis. "Bearer") tetap kelihatan supaya bisa dipakai
-     * memantau apakah klien memang mengirim header ini dengan benar.
+     * Nilai authorization disamarkan, skemanya (mis. "Bearer") tetap kelihatan.
      *
      * @return array<string, array<int, string|null>|null>
      */
@@ -69,9 +67,6 @@ class LogApiRequest
     }
 
     /**
-     * Isi response hanya disimpan kalau route-nya ditandai middleware
-     * saving_body_response, supaya tabel log tidak cepat membengkak.
-     *
      * @return array<mixed>|null
      */
     private function responseBody(Request $request, string $body): ?array

@@ -10,7 +10,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Skema khusus untuk klien luar yang mengakses API aplikasi ini.
         DB::statement('CREATE SCHEMA IF NOT EXISTS data_access_clients');
     }
 

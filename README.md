@@ -63,8 +63,8 @@ Balasan `200 {"status":"ok"}` kalau token valid. Tanpa token, token salah, atau
 klien yang `is_active`-nya false: `403 {"message":"Forbidden."}`.
 
 Setiap request masuk tercatat di `data_access_clients.api_request_logs`,
-termasuk yang ditolak. Header `authorization` tidak ikut disimpan. Isi response
-hanya disimpan untuk route yang ditandai:
+termasuk yang ditolak. Header `authorization` disamarkan (`Bearer *****`), tidak
+disimpan mentah. Isi response hanya disimpan untuk route yang ditandai:
 
 ```php
 Route::get('data-sampel', [DataSampelController::class, 'index'])
