@@ -47,15 +47,23 @@ class LogApiRequest
     }
 
     /**
-     * Header authorization berisi token mentah milik klien, jadi tidak disimpan.
+     * Header authorization berisi token mentah milik klien, jadi nilainya
+     * disamarkan. Skema (mis. "Bearer") tetap kelihatan supaya bisa dipakai
+     * memantau apakah klien memang mengirim header ini dengan benar.
      *
-     * @return array<string, array<int, string|null>>
+     * @return array<string, array<int, string|null>|null>
      */
     private function safeHeaders(Request $request): array
     {
         $headers = $request->headers->all();
+        $authorization = $headers['authorization'][0] ?? null;
 
-        unset($headers['authorization']);
+        if ($authorization === null) {
+            $headers['authorization'] = null;
+        } else {
+            $parts = explode(' ', $authorization, 2);
+            $headers['authorization'] = count($parts) === 2 ? ["{$parts[0]} *****"] : ['*****'];
+        }
 
         return $headers;
     }
