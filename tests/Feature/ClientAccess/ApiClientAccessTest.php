@@ -4,6 +4,7 @@ namespace Tests\Feature\ClientAccess;
 
 use App\Models\ClientAccess\ApiClient;
 use App\Models\ClientAccess\ApiRequestLog;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ApiClientAccessTest extends TestCase
@@ -51,5 +52,33 @@ class ApiClientAccessTest extends TestCase
         $this->assertSame(['foo' => 'bar'], $fresh->request_parameters);
         $this->assertSame(['status' => 'ok'], $fresh->response_body);
         $this->assertSame($client->id, $fresh->client->id);
+    }
+
+    public function test_command_register_membuat_klien_dan_mencetak_token(): void
+    {
+        $this->artisan('client-access:register', ['app_name' => 'Aplikasi Uji Command'])
+            ->assertExitCode(0);
+
+        $client = ApiClient::where('app_name', 'Aplikasi Uji Command')->first();
+
+        $this->assertNotNull($client);
+        $this->assertTrue($client->is_active);
+        // Yang tersimpan hash, panjangnya selalu 64 karakter hex.
+        $this->assertSame(64, strlen($client->token));
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $client->token);
+    }
+
+    public function test_command_register_menolak_nama_yang_sudah_terpakai(): void
+    {
+        ApiClient::create([
+            'app_name' => 'Aplikasi Kembar',
+            'token' => hash('sha256', Str::random(64)),
+            'is_active' => true,
+        ]);
+
+        $this->artisan('client-access:register', ['app_name' => 'Aplikasi Kembar'])
+            ->assertExitCode(1);
+
+        $this->assertSame(1, ApiClient::where('app_name', 'Aplikasi Kembar')->count());
     }
 }
