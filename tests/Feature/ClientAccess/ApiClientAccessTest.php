@@ -81,4 +81,49 @@ class ApiClientAccessTest extends TestCase
 
         $this->assertSame(1, ApiClient::where('app_name', 'Aplikasi Kembar')->count());
     }
+
+    public function test_ping_tanpa_token_ditolak_403(): void
+    {
+        $response = $this->getJson('/api/v1/ping');
+
+        $response->assertStatus(403);
+        $response->assertExactJson(['message' => 'Forbidden.']);
+    }
+
+    public function test_ping_dengan_token_asal_ditolak_403(): void
+    {
+        $this->getJson('/api/v1/ping', ['Authorization' => 'Bearer token-ngawur'])
+            ->assertStatus(403);
+    }
+
+    public function test_ping_dengan_klien_tidak_aktif_ditolak_403(): void
+    {
+        $token = Str::random(64);
+
+        ApiClient::create([
+            'app_name' => 'Aplikasi Dimatikan',
+            'token' => hash('sha256', $token),
+            'is_active' => false,
+        ]);
+
+        $this->getJson('/api/v1/ping', ['Authorization' => "Bearer {$token}"])
+            ->assertStatus(403);
+    }
+
+    public function test_ping_dengan_token_valid_berhasil_dan_memperbarui_last_used_at(): void
+    {
+        $token = Str::random(64);
+
+        $client = ApiClient::create([
+            'app_name' => 'Aplikasi Sah',
+            'token' => hash('sha256', $token),
+            'is_active' => true,
+        ]);
+
+        $response = $this->getJson('/api/v1/ping', ['Authorization' => "Bearer {$token}"]);
+
+        $response->assertStatus(200);
+        $response->assertExactJson(['status' => 'ok']);
+        $this->assertNotNull($client->fresh()->last_used_at);
+    }
 }
