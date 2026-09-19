@@ -126,4 +126,57 @@ class ApiClientAccessTest extends TestCase
         $response->assertExactJson(['status' => 'ok']);
         $this->assertNotNull($client->fresh()->last_used_at);
     }
+
+    public function test_request_yang_berhasil_menulis_satu_baris_log(): void
+    {
+        $token = Str::random(64);
+
+        $client = ApiClient::create([
+            'app_name' => 'Aplikasi Pencatat',
+            'token' => hash('sha256', $token),
+            'is_active' => true,
+        ]);
+
+        $this->getJson('/api/v1/ping?kota=Bandung', ['Authorization' => "Bearer {$token}"])
+            ->assertStatus(200);
+
+        $log = ApiRequestLog::where('api_client_id', $client->id)->firstOrFail();
+
+        $this->assertSame('GET', $log->method);
+        $this->assertSame('api/v1/ping', $log->path);
+        $this->assertSame(200, $log->http_status);
+        $this->assertSame(['kota' => 'Bandung'], $log->request_parameters);
+        $this->assertGreaterThan(0, $log->response_bytes);
+        // Route ping tidak ditandai, jadi isi response tidak disimpan.
+        $this->assertNull($log->response_body);
+    }
+
+    public function test_request_yang_ditolak_tetap_tercatat_tanpa_client_id(): void
+    {
+        $this->getJson('/api/v1/ping', ['Authorization' => 'Bearer token-ngawur'])
+            ->assertStatus(403);
+
+        $log = ApiRequestLog::whereNull('api_client_id')->firstOrFail();
+
+        $this->assertSame(403, $log->http_status);
+        $this->assertSame('api/v1/ping', $log->path);
+    }
+
+    public function test_header_authorization_tidak_ikut_tersimpan(): void
+    {
+        $token = Str::random(64);
+
+        ApiClient::create([
+            'app_name' => 'Aplikasi Rahasia',
+            'token' => hash('sha256', $token),
+            'is_active' => true,
+        ]);
+
+        $this->getJson('/api/v1/ping', ['Authorization' => "Bearer {$token}"])
+            ->assertStatus(200);
+
+        $log = ApiRequestLog::latest('id')->firstOrFail();
+
+        $this->assertArrayNotHasKey('authorization', $log->request_header);
+    }
 }

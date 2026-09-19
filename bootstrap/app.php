@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ClientAccess\AuthenticateApiClient;
+use App\Http\Middleware\ClientAccess\LogApiRequest;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'client.token' => AuthenticateApiClient::class,
+            'client.log' => LogApiRequest::class,
         ]);
 
         // Di server aplikasi berada di belakang reverse proxy yang mengakhiri TLS.
