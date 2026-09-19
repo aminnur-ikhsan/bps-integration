@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\ClientAccess\AuthenticateApiClient;
 use App\Http\Middleware\ClientAccess\LogApiRequest;
+use App\Http\Middleware\ClientAccess\SavingBodyResponse;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'client.token' => AuthenticateApiClient::class,
             'client.log' => LogApiRequest::class,
+            'saving_body_response' => SavingBodyResponse::class,
         ]);
 
         // Di server aplikasi berada di belakang reverse proxy yang mengakhiri TLS.

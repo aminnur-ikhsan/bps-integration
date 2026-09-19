@@ -4,6 +4,7 @@ namespace Tests\Feature\ClientAccess;
 
 use App\Models\ClientAccess\ApiClient;
 use App\Models\ClientAccess\ApiRequestLog;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -178,5 +179,31 @@ class ApiClientAccessTest extends TestCase
         $log = ApiRequestLog::latest('id')->firstOrFail();
 
         $this->assertArrayNotHasKey('authorization', $log->request_header);
+    }
+
+    public function test_route_bertanda_menyimpan_isi_response(): void
+    {
+        // Route uji didaftarkan di dalam test supaya routes/api.php tetap bersih
+        // dari endpoint contoh.
+        Route::prefix('api/v1')
+            ->middleware(['client.log', 'client.token'])
+            ->get('uji-simpan-body', fn () => response()->json(['nilai' => 42]))
+            ->middleware('saving_body_response');
+
+        $token = Str::random(64);
+
+        ApiClient::create([
+            'app_name' => 'Aplikasi Inspeksi',
+            'token' => hash('sha256', $token),
+            'is_active' => true,
+        ]);
+
+        $this->getJson('/api/v1/uji-simpan-body', ['Authorization' => "Bearer {$token}"])
+            ->assertStatus(200);
+
+        $log = ApiRequestLog::latest('id')->firstOrFail();
+
+        $this->assertSame('api/v1/uji-simpan-body', $log->path);
+        $this->assertSame(['nilai' => 42], $log->response_body);
     }
 }
