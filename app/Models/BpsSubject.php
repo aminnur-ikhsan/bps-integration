@@ -34,7 +34,10 @@ class BpsSubject extends Model
      * Relasi ke BpsSubjectCategory
      * BPS tidak menjamin relasi sempurna antar endpoint, jadi relasi bersifat opsional
      */
-    public function category()
+    /**
+     * @return CompositeBelongsTo<BpsSubjectCategory, $this>
+     */
+    public function category(): CompositeBelongsTo
     {
         $instance = $this->newRelatedInstance(BpsSubjectCategory::class);
 
