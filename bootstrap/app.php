@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\Api\ResolveApiRegion;
 use App\Http\Middleware\ClientAccess\AuthenticateApiClient;
 use App\Http\Middleware\ClientAccess\LogApiRequest;
 use App\Http\Middleware\ClientAccess\SavingBodyResponse;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'client.token' => AuthenticateApiClient::class,
             'client.log' => LogApiRequest::class,
             'saving_body_response' => SavingBodyResponse::class,
+            'region' => ResolveApiRegion::class,
         ]);
 
         // Di server aplikasi berada di belakang reverse proxy yang mengakhiri TLS.
