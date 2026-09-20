@@ -10,11 +10,8 @@ Route::prefix('v1')->middleware(['client.log', 'client.token'])->group(function 
 
     Route::get('data-sampel', fn () => response()->json(['status' => 'ok data-sampel']))->middleware('saving_body_response');
 
-    Route::prefix('jawa-barat')->group(function () {
-        Route::get('subject-categories', [SubjectCategoryController::class, 'index'])
-            ->defaults('domain_id', '3200');
-
-        Route::get('subjects', [SubjectController::class, 'index'])
-            ->defaults('domain_id', '3200');
+    Route::prefix('{region}')->middleware('region')->group(function () {
+        Route::get('subject-categories', [SubjectCategoryController::class, 'index']);
+        Route::get('subjects', [SubjectController::class, 'index']);
     });
 });

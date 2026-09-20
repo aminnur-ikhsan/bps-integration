@@ -10,9 +10,11 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class SubjectController extends Controller
 {
-    public function index(Request $request, string $domain_id): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $query = BpsSubject::with('category')->where('domain_id', $domain_id);
+        $domainId = $request->attributes->get('domain_id');
+
+        $query = BpsSubject::with('category')->where('domain_id', $domainId);
 
         if ($request->filled('subcat_id')) {
             $query->where('subcat_id', $request->integer('subcat_id'));
