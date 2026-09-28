@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use App\Relations\CompositeBelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -36,6 +37,25 @@ class BpsVariable extends Model
     public function domain(): BelongsTo
     {
         return $this->belongsTo(BpsDomain::class, 'domain_id', 'domain_id');
+    }
+
+    /**
+     * Relasi ke BpsSubject lewat domain_id + sub_id.
+     * BPS tidak menjamin relasi sempurna antar endpoint, jadi relasi bersifat opsional.
+     */
+    public function subject(): CompositeBelongsTo
+    {
+        $instance = $this->newRelatedInstance(BpsSubject::class);
+
+        return new CompositeBelongsTo(
+            $instance->newQuery(),
+            $this,
+            'sub_id',
+            'sub_id',
+            'domain_id',
+            'domain_id',
+            'subject'
+        );
     }
 
     public function getLabelAttribute(): string
