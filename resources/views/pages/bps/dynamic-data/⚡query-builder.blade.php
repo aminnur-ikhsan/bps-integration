@@ -402,6 +402,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     search-field="yearSearch"
                     :options="$this->yearOptions->pluck('th', 'th_id')"
                     :selected="$years"
+                    :notice="$reloadNotices['years'] ?? null"
+                    :error="$reloadErrors['years'] ?? null"
                     empty="Belum ada data tahun untuk tabel ini." />
 
                 <x-selection-card
@@ -411,6 +413,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->turyearOptions->pluck('turth', 'turth_id')"
                     :selected="$turyears"
                     :group-label="$this->turyearOptions->first()?->name_group_turth"
+                    :notice="$reloadNotices['turyears'] ?? null"
+                    :error="$reloadErrors['turyears'] ?? null"
                     empty="Belum ada data turunan tahun untuk tabel ini." />
 
                 <x-selection-card
@@ -420,6 +424,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
                     :selected="$characteristics"
                     :group-label="$this->characteristicOptions->first()?->name_group_turvar"
+                    :notice="$reloadNotices['characteristics'] ?? null"
+                    :error="$reloadErrors['characteristics'] ?? null"
                     empty="Belum ada data karakteristik untuk tabel ini." />
 
                 <x-selection-card
@@ -429,6 +435,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
                     :selected="$vervars"
                     :group-label="$this->vervarOptions->first()?->name_group_ver_id"
+                    :notice="$reloadNotices['vervars'] ?? null"
+                    :error="$reloadErrors['vervars'] ?? null"
                     empty="Belum ada data judul baris untuk tabel ini." />
             </div>
         @endif
