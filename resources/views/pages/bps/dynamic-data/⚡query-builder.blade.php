@@ -8,6 +8,11 @@ use App\Models\BpsSubject;
 use App\Models\BpsSubjectCategory;
 use App\Models\BpsVariable;
 use App\Models\BpsVerticalVariable;
+use App\Services\Bps\BpsApiException;
+use App\Services\Bps\DerivedPeriodSync;
+use App\Services\Bps\DerivedVariableSync;
+use App\Services\Bps\PeriodSync;
+use App\Services\Bps\VerticalVariableSync;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -25,6 +30,9 @@ new #[Title('Data Dinamis')] class extends Component {
     public array $turyears = [];
     public array $characteristics = [];
     public array $vervars = [];
+
+    public array $reloadNotices = [];
+    public array $reloadErrors = [];
 
     public string $yearSearch = '';
     public string $turyearSearch = '';
@@ -142,6 +150,34 @@ new #[Title('Data Dinamis')] class extends Component {
             'vervars' => 'vervar_id',
             default => '',
         };
+    }
+
+    private function fieldSyncClass(string $field): string
+    {
+        return match ($field) {
+            'years' => PeriodSync::class,
+            'turyears' => DerivedPeriodSync::class,
+            'characteristics' => DerivedVariableSync::class,
+            'vervars' => VerticalVariableSync::class,
+            default => throw new \InvalidArgumentException("Field tidak dikenal: {$field}"),
+        };
+    }
+
+    public function reload(string $field): void
+    {
+        if (! in_array($field, self::TOGGLE_FIELDS, true) || ! $this->varId) {
+            return;
+        }
+
+        unset($this->reloadErrors[$field], $this->reloadNotices[$field]);
+
+        try {
+            $result = app($this->fieldSyncClass($field))->sync(self::DOMAIN, (int) $this->varId, auth()->id());
+            $this->reloadNotices[$field] = "Berhasil, {$result->count} data diperbarui.";
+            $this->{$field} = [];
+        } catch (BpsApiException $e) {
+            $this->reloadErrors[$field] = $e->getMessage();
+        }
     }
 
     public function tambah(): void
