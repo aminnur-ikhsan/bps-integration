@@ -64,6 +64,8 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyearSearch = '';
         $this->characteristicSearch = '';
         $this->vervarSearch = '';
+        $this->reloadNotices = [];
+        $this->reloadErrors = [];
     }
 
     private function resetTableForm(): void
@@ -77,6 +79,8 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyearSearch = '';
         $this->characteristicSearch = '';
         $this->vervarSearch = '';
+        $this->reloadNotices = [];
+        $this->reloadErrors = [];
     }
 
     public function aturUlang(): void
