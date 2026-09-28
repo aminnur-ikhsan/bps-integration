@@ -48,7 +48,7 @@ new #[Title('Variables')] class extends Component {
 
     public function with(): array
     {
-        $query = BpsVariable::where('domain_id', $this->domainId);
+        $query = BpsVariable::where('domain_id', $this->domainId)->with('subject.category');
 
         if ($this->search !== '') {
             $term = $this->search;
@@ -66,8 +66,11 @@ new #[Title('Variables')] class extends Component {
             'variables' => $query->orderBy('title')->paginate(20),
             'columns'   => [
                 ['label' => 'Var ID', 'field' => 'var_id'],
-                ['label' => 'Judul', 'field' => 'title'],
-                ['label' => 'Subjek', 'field' => 'sub_name'],
+                ['label' => 'Nama Indikator', 'field' => 'title'],
+                ['label' => 'Definisi', 'field' => 'def'],
+                ['label' => 'Grafik', 'field' => 'graph_name'],
+                ['label' => 'Subject Kategori', 'field' => 'subject.category.title'],
+                ['label' => 'Subject', 'field' => 'sub_name'],
                 ['label' => 'Satuan', 'field' => 'unit'],
                 ['label' => 'Sync terakhir', 'field' => 'last_synced_at', 'date' => true],
             ],
