@@ -6,6 +6,8 @@
     'selected' => [],
     'groupLabel' => null,
     'empty' => 'Belum ada data.',
+    'notice' => null,
+    'error' => null,
 ])
 
 @php
@@ -36,11 +38,28 @@
             @if ($groupLabel)
                 <p class="mt-0.5 text-xs text-zinc-400">{{ $groupLabel }}</p>
             @endif
+            @if ($notice)
+                <p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">{{ $notice }}</p>
+            @elseif ($error)
+                <p class="mt-1 text-xs text-red-500">{{ $error }}</p>
+            @endif
         </div>
 
-        @if ($totalCount > 0)
-            <flux:button wire:click="toggleAll('{{ $field }}')" size="sm">{{ __('Pilih Semua') }}</flux:button>
-        @endif
+        <div class="flex items-center gap-2">
+            <flux:button
+                wire:click="reload('{{ $field }}')"
+                wire:confirm="Yakin reload {{ $label }}? Ambil data terbaru dari BPS."
+                wire:loading.attr="disabled"
+                wire:loading.class="animate-spin"
+                wire:target="reload('{{ $field }}')"
+                variant="ghost"
+                size="sm"
+                icon="arrow-path" />
+
+            @if ($totalCount > 0)
+                <flux:button wire:click="toggleAll('{{ $field }}')" size="sm">{{ __('Pilih Semua') }}</flux:button>
+            @endif
+        </div>
     </div>
 
     @if ($totalCount === 0)

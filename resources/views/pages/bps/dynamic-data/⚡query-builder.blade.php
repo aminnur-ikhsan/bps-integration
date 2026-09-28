@@ -8,6 +8,11 @@ use App\Models\BpsSubject;
 use App\Models\BpsSubjectCategory;
 use App\Models\BpsVariable;
 use App\Models\BpsVerticalVariable;
+use App\Services\Bps\BpsApiException;
+use App\Services\Bps\DerivedPeriodSync;
+use App\Services\Bps\DerivedVariableSync;
+use App\Services\Bps\PeriodSync;
+use App\Services\Bps\VerticalVariableSync;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -25,6 +30,9 @@ new #[Title('Data Dinamis')] class extends Component {
     public array $turyears = [];
     public array $characteristics = [];
     public array $vervars = [];
+
+    public array $reloadNotices = [];
+    public array $reloadErrors = [];
 
     public string $yearSearch = '';
     public string $turyearSearch = '';
@@ -56,6 +64,8 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyearSearch = '';
         $this->characteristicSearch = '';
         $this->vervarSearch = '';
+        $this->reloadNotices = [];
+        $this->reloadErrors = [];
     }
 
     private function resetTableForm(): void
@@ -69,6 +79,8 @@ new #[Title('Data Dinamis')] class extends Component {
         $this->turyearSearch = '';
         $this->characteristicSearch = '';
         $this->vervarSearch = '';
+        $this->reloadNotices = [];
+        $this->reloadErrors = [];
     }
 
     public function aturUlang(): void
@@ -142,6 +154,34 @@ new #[Title('Data Dinamis')] class extends Component {
             'vervars' => 'vervar_id',
             default => '',
         };
+    }
+
+    private function fieldSyncClass(string $field): string
+    {
+        return match ($field) {
+            'years' => PeriodSync::class,
+            'turyears' => DerivedPeriodSync::class,
+            'characteristics' => DerivedVariableSync::class,
+            'vervars' => VerticalVariableSync::class,
+            default => throw new \InvalidArgumentException("Field tidak dikenal: {$field}"),
+        };
+    }
+
+    public function reload(string $field): void
+    {
+        if (! in_array($field, self::TOGGLE_FIELDS, true) || ! $this->varId) {
+            return;
+        }
+
+        unset($this->reloadErrors[$field], $this->reloadNotices[$field]);
+
+        try {
+            $result = app($this->fieldSyncClass($field))->sync(self::DOMAIN, (int) $this->varId, auth()->id());
+            $this->reloadNotices[$field] = "Berhasil, {$result->count} data diperbarui.";
+            $this->{$field} = [];
+        } catch (BpsApiException $e) {
+            $this->reloadErrors[$field] = $e->getMessage();
+        }
     }
 
     public function tambah(): void
@@ -366,6 +406,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     search-field="yearSearch"
                     :options="$this->yearOptions->pluck('th', 'th_id')"
                     :selected="$years"
+                    :notice="$reloadNotices['years'] ?? null"
+                    :error="$reloadErrors['years'] ?? null"
                     empty="Belum ada data tahun untuk tabel ini." />
 
                 <x-selection-card
@@ -375,6 +417,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->turyearOptions->pluck('turth', 'turth_id')"
                     :selected="$turyears"
                     :group-label="$this->turyearOptions->first()?->name_group_turth"
+                    :notice="$reloadNotices['turyears'] ?? null"
+                    :error="$reloadErrors['turyears'] ?? null"
                     empty="Belum ada data turunan tahun untuk tabel ini." />
 
                 <x-selection-card
@@ -384,6 +428,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->characteristicOptions->pluck('turvar', 'turvar_id')"
                     :selected="$characteristics"
                     :group-label="$this->characteristicOptions->first()?->name_group_turvar"
+                    :notice="$reloadNotices['characteristics'] ?? null"
+                    :error="$reloadErrors['characteristics'] ?? null"
                     empty="Belum ada data karakteristik untuk tabel ini." />
 
                 <x-selection-card
@@ -393,6 +439,8 @@ new #[Title('Data Dinamis')] class extends Component {
                     :options="$this->vervarOptions->pluck('vervar', 'vervar_id')"
                     :selected="$vervars"
                     :group-label="$this->vervarOptions->first()?->name_group_ver_id"
+                    :notice="$reloadNotices['vervars'] ?? null"
+                    :error="$reloadErrors['vervars'] ?? null"
                     empty="Belum ada data judul baris untuk tabel ini." />
             </div>
         @endif
