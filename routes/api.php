@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\SubjectCategoryController;
 use App\Http\Controllers\Api\SubjectController;
+use App\Http\Controllers\Api\VariableController;
 use Illuminate\Support\Facades\Route;
 
 // client.log di luar client.token supaya request yang ditolak 403 tetap tercatat.
@@ -13,5 +14,7 @@ Route::prefix('v1')->middleware(['client.log', 'client.token'])->group(function 
     Route::prefix('{region}')->middleware('region')->group(function () {
         Route::get('subject-categories', [SubjectCategoryController::class, 'index']);
         Route::get('subjects', [SubjectController::class, 'index']);
+        Route::get('variables', [VariableController::class, 'index']);
+        Route::get('variables/{var_id}', [VariableController::class, 'show'])->whereNumber('var_id');
     });
 });
