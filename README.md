@@ -74,6 +74,9 @@ Route::get('data-sampel', [DataSampelController::class, 'index'])
 Collection Postman ada di `docs/api/bps-integration.postman_collection.json`
 (folder `docs` di-gitignore, jadi file itu tidak ikut di repo).
 
+Jalur sementara yang menyajikan snapshot data Japati (`/api/v1/japati-mirror`)
+dijelaskan di [README-japati-mirror.md](README-japati-mirror.md).
+
 ## Test
 
 ```bash
