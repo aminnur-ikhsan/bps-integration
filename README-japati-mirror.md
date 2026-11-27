@@ -82,6 +82,7 @@ Default-Key-Tahun-Kinerja-public: 20262
 | Header tahun tidak ada, bukan tepat 5 digit, atau foldernya tidak ada | `200 []` |
 | `satuan_kerja_id` tidak ada di `satuan-kerja.json` | `404 {"message":"Satuan kerja tidak dikenal di mirror Japati."}` |
 | Id valid tapi `cascading_<id>.json` belum diunggah | `404 {"message":"Data cascading mirror Japati belum diunggah."}` |
+| File ada tapi tidak terbaca, kosong, atau bukan JSON valid (mis. unggahan belum selesai, izin salah) | `503 {"message":"Data mirror Japati tidak terbaca atau belum lengkap."}` |
 | Selain itu | `200`, isi `cascading_<id>.json` |
 
 Catatan:
@@ -90,7 +91,10 @@ Catatan:
   jalur path traversal. Id Dinas (4 digit) dan Biro (12 digit) dicocokkan sebagai teks.
 - Japati asli membalas 302 (redirect ke alamat yang tidak bisa dihubungi) untuk id
   kosong. Itu tidak ditiru: mirror membalas 422.
-- Daftar belum diunggah: `404 {"message":"Data mirror Japati belum diunggah."}`.
+- Daftar belum diunggah: `404 {"message":"Data mirror Japati belum diunggah."}`. Daftar yang
+  ada tapi rusak atau kosong: `503` seperti di tabel.
+- Unggah file lengkap dulu (mis. ke nama sementara lalu `mv`) supaya pemanggil tidak
+  membaca file setengah jadi.
 
 ### Header penanda snapshot
 

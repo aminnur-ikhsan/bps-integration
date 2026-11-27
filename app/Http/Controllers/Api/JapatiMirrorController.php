@@ -25,8 +25,7 @@ class JapatiMirrorController extends Controller
 
     public function satuanKerja(): Response
     {
-        $path = self::FOLDER.'/'.self::LIST_YEAR.'/satuan-kerja.json';
-        $content = Storage::disk('local')->get($path);
+        $content = $this->readJsonFile(self::FOLDER.'/'.self::LIST_YEAR.'/satuan-kerja.json');
 
         if ($content === null) {
             return $this->notFound('Data mirror Japati belum diunggah.');
@@ -51,7 +50,7 @@ class JapatiMirrorController extends Controller
             return $this->jsonBody('[]', null);
         }
 
-        $listContent = Storage::disk('local')->get(self::FOLDER.'/'.$year.'/satuan-kerja.json');
+        $listContent = $this->readJsonFile(self::FOLDER.'/'.$year.'/satuan-kerja.json');
 
         if ($listContent === null) {
             return $this->jsonBody('[]', $year);
@@ -64,13 +63,33 @@ class JapatiMirrorController extends Controller
             return $this->notFound('Satuan kerja tidak dikenal di mirror Japati.');
         }
 
-        $content = Storage::disk('local')->get(self::FOLDER.'/'.$year.'/cascading_'.$matchedId.'.json');
+        $content = $this->readJsonFile(self::FOLDER.'/'.$year.'/cascading_'.$matchedId.'.json');
 
         if ($content === null) {
             return $this->notFound('Data cascading mirror Japati belum diunggah.');
         }
 
         return $this->jsonBody($content, $year);
+    }
+
+    // Isi file mentah, null kalau filenya belum diunggah. File ada tapi tidak
+    // terbaca, kosong, atau bukan JSON valid (mis. unggahan belum selesai)
+    // dibalas 503, supaya tidak tampil sebagai data kosong atau data rusak.
+    private function readJsonFile(string $path): ?string
+    {
+        $disk = Storage::disk('local');
+
+        if (! $disk->exists($path)) {
+            return null;
+        }
+
+        $content = $disk->get($path);
+
+        if ($content === null || ! json_validate($content)) {
+            abort(503, 'Data mirror Japati tidak terbaca atau belum lengkap.');
+        }
+
+        return $content;
     }
 
     // Cari id di daftar satuan kerja. Id Japati ada yang angka 4 digit, ada
